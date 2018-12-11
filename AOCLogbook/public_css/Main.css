@@ -104,6 +104,7 @@ label {
 }
 
 #submitButton {
+	margin-right: 50px;
 	float: right;
 	border-radius: 8px;
 	background-color: #4CAF50;
@@ -117,7 +118,7 @@ label {
 }
 
 #cancelButton {
-	float: left;
+	margin-left: 50px;
 	border-radius: 8px;
 	background-color: #4CAF50;
 	border: none;

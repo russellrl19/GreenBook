@@ -33,6 +33,7 @@
 
 	<br>
 	<h2 align="center">CADET</h2>
+	<p align="center">Please fill in the following information on the cadet(s) involved and the proceding incident.</p>
 
 	<form class="inputBox" action="/action_page.php">
 		<h2>Who</h2>
@@ -41,6 +42,7 @@
 			<label>Middle inital: </label><input id="detail" type="text" name="mname"<br>
 			<label>Last name: </label><input id="detail" type="text" name="lname"><br>
 			<label>Room Number: </label><input id="detail" type="number" name="roomNumber"><br>
+			<button>Add Another Cadet</button>
 		</div>
 
 		<br>
@@ -49,8 +51,8 @@
 			<label>Use current Date/Time?</label>
 			<input type="radio" name="time" value="yes"> Yes </input>
 			<input type="radio" name="time" value="no"> No </input>
-		  <label>Date: </label><input id="detail" type="datetime" name="date"><br>
-		  <label>Time: </label><input id="detail" type="text" name="time"><br>
+			<label>Date: </label><input id="detail" type="date" name="date"><br>
+		  <label>Time: </label><input id="detail" type="time" name="time"><br>
 		</div>
 
 		<br>
@@ -70,18 +72,12 @@
 
 		</div>
 
-		<br>
-		<h2>Submission</h2>
+		<br><br>
 		<input id="cancelButton" type="reset" value="Clear">
-	  <input id="submitButton" type="submit" value="Submit" onclick="msg()">
+	  <input id="submitButton" type="submit" value="Submit">
 		<br><br><br>
+		
 	</form>
-
-	<script>
-		function msg() {
-		    alert("Your form has not been completed");
-		}
-	</script>
 
 </body>
 
