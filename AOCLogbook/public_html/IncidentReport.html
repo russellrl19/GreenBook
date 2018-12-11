@@ -25,35 +25,57 @@
 
 	<div class="sidenav">
 	  <a href="Dashboard.html">Dashboard</a>
-	  <a href="IncidentReport.html">Incident Report</a>
+	  <a id="currentTab" href="IncidentReport.html">Incident Report</a>
 	  <a href="DailyReport.html">Daily Log</a>
 	  <a href="SearchReport.html">Report Search</a>
 	  <a href="Trends.html">Barracks Trends</a>
 	</div>
 
+	<h2 align="center">CADET</h2>
 	<form class="inputBox" action="/action_page.php">
 		<h2>Who</h2>
 		<div id="cadetField">
 		  <label>First name: </label><input id="detail" type="text" name="fname"><br>
-		  <label>Last name: </label><input id="detail" type="text" name="lname"><br>
-		</div>
-
-		<br>
-		<h2>What</h2>
-		<div id="whatField">
-		  <label>Incident: </label><input id="detail" type="text" name="incidentTag"><br>
+			<label>Middle inital: </label><input id="detail" type="text" name="mname"<br>
+			<label>Last name: </label><input id="detail" type="text" name="lname"><br>
+			<label>Room Number: </label><input id="detail" type="number" name="roomNumber"><br>
 		</div>
 
 		<br>
 		<h2>When</h2>
 		<div id="whenField">
-		  <label>Date: </label><input id="detail" type="text" name="date"><br>
+			<label>Use current Date/Time?</label>
+			<input type="radio" name="time" value="yes"> Yes </input>
+			<input type="radio" name="time" value="no"> No </input>
+		  <label>Date: </label><input id="detail" type="datetime" name="date"><br>
 		  <label>Time: </label><input id="detail" type="text" name="time"><br>
 		</div>
 
+		<br>
+		<h2>What</h2>
+		<div id="whatField">
+			<label>Incident Type: </label>
+			<select id="detail">
+				<option value="null"></option>
+			  <option value="medical">Medical</option>
+			  <option value="emergency">Emergency</option>
+			  <option value="alcohol">Alcohol</option>
+			  <option value="audi">Audi</option>
+			</select>
+
+			<label>Narrative: </label><textarea id="detail" rows="4" cols="35"></textarea><br>
+		</div>
+
 		<br><br>
-	  <input id="submitButton" type="submit" value="Submit">
+		<input id="cancelButton" type="reset" value="Clear">
+	  <input id="submitButton" type="submit" value="Submit" onclick="msg()">
 	</form>
+
+	<script>
+		function msg() {
+		    alert("Your form has not been completed");
+		}
+	</script>
 
 </body>
 

@@ -14,7 +14,7 @@
 
 	<div class="dropdown">
 		<img id="titleSpider" src="../PhotoContent/spider.png">
-		<h1 align="center">Daily Report</h1>
+		<h1 align="center">Daily Log</h1>
 		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Username</button>
 			<!--div id="myDropdown" class="dropdown-content">
 				<a href="#">Profile</a>
@@ -26,7 +26,7 @@
 	<div class="sidenav">
 	  <a href="Dashboard.html">Dashboard</a>
 	  <a href="IncidentReport.html">Incident Report</a>
-	  <a href="DailyReport.html">Daily Log</a>
+	  <a id="currentTab" href="DailyReport.html">Daily Log</a>
 	  <a href="SearchReport.html">Report Search</a>
 	  <a href="Trends.html">Barracks Trends</a>
 	</div>
@@ -41,17 +41,21 @@
 		<br>
 		<h2>What</h2>
 		<div id="whatField">
-		  <label>Incident: </label><input id="detail" type="text" name="incidentTag"><br>
+		  <label>Narrative: </label><textarea id="detail" rows="4" cols="30"></textarea><br>
 		</div>
 
 		<br>
 		<h2>When</h2>
 		<div id="whenField">
+			<label>Use current Date/Time?</label>
+			<input type="radio" name="time" value="yes"> Yes </input>
+			<input type="radio" name="time" value="no"> No </input>
 		  <label>Date: </label><input id="detail" type="text" name="date"><br>
 		  <label>Time: </label><input id="detail" type="text" name="time"><br>
 		</div>
 
 		<br><br>
+		<input id="cancelButton" type="reset" value="Clear">
 	  <input id="submitButton" type="submit" value="Submit">
 	</form>
 
