@@ -13,9 +13,9 @@
 <body>
 
 	<div class="dropdown">
-		<img id="titleSpider" src="../PhotoContent/spider.png">
+		<a href="Dashboard.html"><img id="titleSpider" src="../PhotoContent/spider.png"></a>
+		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Welcome Guest</button>
 		<h1 align="center">Incident Report</h1>
-		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Username</button>
 			<!--div id="myDropdown" class="dropdown-content">
 				<a href="#">Profile</a>
 				<a href="#">Log Out</a>
@@ -31,7 +31,9 @@
 	  <a href="Trends.html">Barracks Trends</a>
 	</div>
 
+	<br>
 	<h2 align="center">CADET</h2>
+
 	<form class="inputBox" action="/action_page.php">
 		<h2>Who</h2>
 		<div id="cadetField">
@@ -55,20 +57,24 @@
 		<h2>What</h2>
 		<div id="whatField">
 			<label>Incident Type: </label>
-			<select id="detail">
+			<select id="" required>
 				<option value="null"></option>
 			  <option value="medical">Medical</option>
 			  <option value="emergency">Emergency</option>
 			  <option value="alcohol">Alcohol</option>
-			  <option value="audi">Audi</option>
-			</select>
+			  <option value="audi">Other</option>
+			</select><br><br>
 
-			<label>Narrative: </label><textarea id="detail" rows="4" cols="35"></textarea><br>
+			<label>Narrative:</label><textarea id="detail" rows="4" cols="35"></textarea><br><br>
+			<label>Add photo:</label><br><input type="file" name="pic" accept="image/*" required>
+
 		</div>
 
-		<br><br>
+		<br>
+		<h2>Submission</h2>
 		<input id="cancelButton" type="reset" value="Clear">
 	  <input id="submitButton" type="submit" value="Submit" onclick="msg()">
+		<br><br><br>
 	</form>
 
 	<script>
