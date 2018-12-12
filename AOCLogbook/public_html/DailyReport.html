@@ -13,9 +13,9 @@
 <body>
 
 	<div class="dropdown">
-		<img id="titleSpider" src="../PhotoContent/spider.png">
+		<a href="Dashboard.html"><img id="titleSpider" src="../PhotoContent/spider.png"></a>
+		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Welcome Guest</button>
 		<h1 align="center">Daily Log</h1>
-		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Username</button>
 			<!--div id="myDropdown" class="dropdown-content">
 				<a href="#">Profile</a>
 				<a href="#">Log Out</a>
@@ -50,13 +50,15 @@
 			<label>Use current Date/Time?</label>
 			<input type="radio" name="time" value="yes"> Yes </input>
 			<input type="radio" name="time" value="no"> No </input>
-		  <label>Date: </label><input id="detail" type="text" name="date"><br>
-		  <label>Time: </label><input id="detail" type="text" name="time"><br>
+			<label>Date: </label><input id="detail" type="date" name="date"><br>
+		  <label>Time: </label><input id="detail" type="time" name="time"><br>
 		</div>
 
 		<br><br>
 		<input id="cancelButton" type="reset" value="Clear">
 	  <input id="submitButton" type="submit" value="Submit">
+		<br><br><br>
+		
 	</form>
 
 </body>

@@ -13,9 +13,9 @@
 <body>
 
 	<div class="dropdown">
-		<img id="titleSpider" src="../PhotoContent/spider.png">
+		<a href="Dashboard.html"><img id="titleSpider" src="../PhotoContent/spider.png"></a>
+		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Welcome Guest</button>
 		<h1 align="center">Search for Reports</h1>
-		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Username</button>
 			<!--div id="myDropdown" class="dropdown-content">
 				<a href="#">Profile</a>
 				<a href="#">Log Out</a>
@@ -41,14 +41,21 @@
 		<br>
 		<h2>What</h2>
 		<div id="whatField">
-		  <label>Incident: </label><input id="detail" type="text" name="incidentTag"><br>
+			<label>Incident Type: </label>
+			<select id="" required>
+				<option value="null"></option>
+			  <option value="medical">Medical</option>
+			  <option value="emergency">Emergency</option>
+			  <option value="alcohol">Alcohol</option>
+			  <option value="audi">Other</option>
+			</select><br><br>
 		</div>
 
 		<br>
 		<h2>When</h2>
 		<div id="whenField">
-		  <label>Date: </label><input id="detail" type="text" name="date"><br>
-		  <label>Time: </label><input id="detail" type="text" name="time"><br>
+		  <label>Date: </label><input id="detail" type="date" name="date"><br>
+		  <label>Time: </label><input id="detail" type="time" name="time"><br>
 		</div>
 
 		<br><br>

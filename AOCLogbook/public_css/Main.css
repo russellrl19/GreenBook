@@ -1,4 +1,4 @@
-html{
+html {
 	font-family: "Lato", sans-serif;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -25,10 +25,18 @@ header {
 #titleSpider {
 	height: 100px;
 	float: left;
+	margin-top: -40px;
+}
+
+#practiceMath {
+	height: 500px;
+	padding: 50px;
+	padding-left: 100px;
 }
 
 #usernameButton {
 	float: right;
+	font-size: 20px;
 }
 
 h1 {
@@ -43,6 +51,7 @@ body {
 }
 
 .sidenav {
+	/*margin-left: -100px;*/
 	float: left;
 	height: 620px;
 	width: 220px;
@@ -79,9 +88,8 @@ label {
 }
 
 .inputBox {
-	/*float: right;*/
+	padding-left: 40%;
 	/*padding-right: 40%;*/
-	padding-left: 300px;
 	width: 325px;
 }
 
@@ -96,6 +104,7 @@ label {
 }
 
 #submitButton {
+	margin-right: 50px;
 	float: right;
 	border-radius: 8px;
 	background-color: #4CAF50;
@@ -109,7 +118,7 @@ label {
 }
 
 #cancelButton {
-	float: left;
+	margin-left: 50px;
 	border-radius: 8px;
 	background-color: #4CAF50;
 	border: none;
@@ -148,7 +157,7 @@ label {
 	border-left: none;
 	border-right: none;
 	border-bottom-color: black;
-	padding-bottom: 30px;
+	padding-bottom: 5px;
 }
 
 /* Dropdown button on hover & focus */

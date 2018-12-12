@@ -13,9 +13,9 @@
 <body>
 
 	<div class="dropdown">
-		<img id="titleSpider" src="../PhotoContent/spider.png">
+		<a href="Dashboard.html"><img id="titleSpider" src="../PhotoContent/spider.png"></a>
+		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Welcome Guest</button>
 		<h1 align="center">Incident Report</h1>
-		<button id="usernameButton" onclick="myFunction()" class="dropbtn">Username</button>
 			<!--div id="myDropdown" class="dropdown-content">
 				<a href="#">Profile</a>
 				<a href="#">Log Out</a>
@@ -31,7 +31,10 @@
 	  <a href="Trends.html">Barracks Trends</a>
 	</div>
 
+	<br>
 	<h2 align="center">CADET</h2>
+	<p align="center">Please fill in the following information on the cadet(s) involved and the proceding incident.</p>
+
 	<form class="inputBox" action="/action_page.php">
 		<h2>Who</h2>
 		<div id="cadetField">
@@ -39,6 +42,7 @@
 			<label>Middle inital: </label><input id="detail" type="text" name="mname"<br>
 			<label>Last name: </label><input id="detail" type="text" name="lname"><br>
 			<label>Room Number: </label><input id="detail" type="number" name="roomNumber"><br>
+			<button>Add Another Cadet</button>
 		</div>
 
 		<br>
@@ -47,35 +51,33 @@
 			<label>Use current Date/Time?</label>
 			<input type="radio" name="time" value="yes"> Yes </input>
 			<input type="radio" name="time" value="no"> No </input>
-		  <label>Date: </label><input id="detail" type="datetime" name="date"><br>
-		  <label>Time: </label><input id="detail" type="text" name="time"><br>
+			<label>Date: </label><input id="detail" type="date" name="date"><br>
+		  <label>Time: </label><input id="detail" type="time" name="time"><br>
 		</div>
 
 		<br>
 		<h2>What</h2>
 		<div id="whatField">
 			<label>Incident Type: </label>
-			<select id="detail">
+			<select id="" required>
 				<option value="null"></option>
 			  <option value="medical">Medical</option>
 			  <option value="emergency">Emergency</option>
 			  <option value="alcohol">Alcohol</option>
-			  <option value="audi">Audi</option>
-			</select>
+			  <option value="audi">Other</option>
+			</select><br><br>
 
-			<label>Narrative: </label><textarea id="detail" rows="4" cols="35"></textarea><br>
+			<label>Narrative:</label><textarea id="detail" rows="4" cols="35"></textarea><br><br>
+			<label>Add photo:</label><br><input type="file" name="pic" accept="image/*" required>
+
 		</div>
 
 		<br><br>
 		<input id="cancelButton" type="reset" value="Clear">
-	  <input id="submitButton" type="submit" value="Submit" onclick="msg()">
+	  <input id="submitButton" type="submit" value="Submit">
+		<br><br><br>
+		
 	</form>
-
-	<script>
-		function msg() {
-		    alert("Your form has not been completed");
-		}
-	</script>
 
 </body>
 
