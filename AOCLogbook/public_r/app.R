@@ -1,6 +1,13 @@
 library(shiny)
 library(shinydashboard)
 library(shinyTime)
+library(RMySQL)
+library(dbConnect)
+library(DBI)
+library(gWidgets)
+library(dplyr)
+library(dbplyr)
+library(pool)
 
 ui <- dashboardPage(
   skin = "green",
@@ -13,7 +20,7 @@ ui <- dashboardPage(
       menuItem("Daily Report", tabName = "dailyReport", icon = icon("globe")),
       menuItem("Search Reports", tabName = "searchReports", icon = icon("search"))
     )
-  ), 
+  ),
   dashboardBody(
     tabItems(
       tabItem(tabName = "dashboard",
@@ -79,8 +86,21 @@ ui <- dashboardPage(
 
 
 server <- function(input, output) {
+
+  # Connect to MySQL DB
+  output$plot3 <- renderTable({
+    conn <- dbConnect(
+      drv = RMySQL::MySQL(),
+      dbname = "greenbook",
+      host = "localhost",
+      username = "root",
+      password = "root")
+    on.exit(dbDisconnect(conn), add = TRUE)
+    dbGetQuery(conn, paste0(
+      "SELECT * FROM user;"))
+  })
   
-  output$value <- renderText({ input$caption })
+  #output$value <- renderText({ input$caption })
   
 }
 
