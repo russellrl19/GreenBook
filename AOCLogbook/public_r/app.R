@@ -7,6 +7,7 @@ ui <- dashboardPage(
   dashboardHeader(title = "VMI Green Book"),
   dashboardSidebar(
     sidebarMenu(
+      tags$img(id="VMIspider", src='spider.png', height=60, width=60),
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),
       menuItem("Incident Report", tabName = "incidentReport", icon = icon("book")),
@@ -66,7 +67,33 @@ ui <- dashboardPage(
               submitButton("Submit")
       ),
       tabItem(tabName = "dailyReport",
-              h2("Daily Report")
+              h2("Daily Report"),
+              box(
+                title = "Who", solidHeader = TRUE,
+                textInput("firstName", "First Name:", width = '400px', placeholder = "First Name"),
+                textInput("lastName", "Last Name:", width = '400px', placeholder = "Last Name")
+              ),
+              box(
+                title = "When", solidHeader = TRUE,
+                dateInput("date", "Date of event:", width = '400px', value = Sys.Date()),
+                timeInput("time", "Time of event:", seconds = FALSE,  value = Sys.time())
+              ),
+              box(
+                title = "What", solidHeader = TRUE,
+                selectInput("eventTag", "Event Type:", 
+                            c("Choose one",
+                              "Patrol" = "ptrl",
+                              "BRC" = "brc",
+                              "SRC" = "src",
+                              "OCMI" = "ocmi"
+                            )
+                ),
+                textAreaInput(
+                  "narrative", "Narrative:", width = '400px'
+                )
+              ),
+              
+              submitButton("Submit")
       ),
       tabItem(tabName = "searchReports",
               h2("Search Reports"),
