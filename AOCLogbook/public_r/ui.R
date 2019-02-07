@@ -58,7 +58,7 @@ ui <- dashboardPage(
                             )
                 ),
                 textAreaInput(
-                  "narrative", "Narrative:", width = '400px'
+                  "narrative", "Narrative:", width = '750px', height = '200px'
                 ),
                 fileInput("file", "Attach Picture(s)", multiple = TRUE)
               ),
