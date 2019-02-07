@@ -40,7 +40,7 @@ ui <- dashboardPage(
                 textInput("firstName", "First Name:", width = '400px', placeholder = "First Name"),
                 textInput("midName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
                 textInput("lastName", "Last Name:", width = '400px', placeholder = "Last Name"),
-                textInput("roomNum", "Room Number:", width = '400px', placeholder = "Room Number")
+                numericInput("roomNum", "Room Number:", value = '109', width = '400px', min = 100, max = 3440 )
               ),
               box(
                 title = "When", solidHeader = TRUE,
