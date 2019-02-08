@@ -20,28 +20,3 @@ con = dbConnect(MySQL(),
 
 dbListTables(con)
 dbExistsTable(con, 'user')
-
-my_db <- dbPool(
-  RMySQL::MySQL(), 
-  dbname = "greenbook",
-  host = "localhost",
-  username = "root",
-  password = "root"
-)
-
-rs <- dbSendQuery(con, "SELECT * FROM user;")
-dbFetch(rs)
-dbClearResult(rs)
-dbDisconnect(con)
-
-output$tbl <- renderTable({
-  conn <- dbConnect(
-    drv = RMySQL::MySQL(),
-    dbname = "greenbook",
-    host = "localhost",
-    username = "root",
-    password = "root")
-  on.exit(dbDisconnect(conn), add = TRUE)
-  dbGetQuery(conn, paste0(
-    "SELECT * FROM greenbook LIMIT ", input$nrows, ";"))
-})

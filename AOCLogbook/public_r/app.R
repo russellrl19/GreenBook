@@ -9,7 +9,7 @@ library(dplyr)
 library(dbplyr)
 library(pool)
 
-ui <- dashboardPage(
+ui <- fluidPage(dashboardPage(
   skin = "green",
   dashboardHeader(title = "VMI Green Book"),
   dashboardSidebar(
@@ -70,7 +70,7 @@ ui <- dashboardPage(
                 fileInput("file", "Attach Picture(s)", multiple = TRUE)
               ),
               
-              submitButton("Submit")
+              actionButton("incidentPOST", "Submit")
       ),
       tabItem(tabName = "dailyReport",
               h2("Daily Report")
@@ -83,25 +83,44 @@ ui <- dashboardPage(
     )
   )
 )
-
+)
 
 server <- function(input, output) {
+  
+  conn = dbConnect(MySQL(),
+          user='root',
+          password='root',
+          dbname='greenbook',
+          host='localhost')
 
-  # Connect to MySQL DB
-  output$plot3 <- renderTable({
-    conn <- dbConnect(
-      drv = RMySQL::MySQL(),
-      dbname = "greenbook",
-      host = "localhost",
-      username = "root",
-      password = "root")
-    on.exit(dbDisconnect(conn), add = TRUE)
-    dbGetQuery(conn, paste0(
-      "SELECT * FROM user;"))
+  observeEvent(input$incidentPOST, {
+    v$doPlot <- input$incidentPOST
   })
   
-  #output$value <- renderText({ input$caption })
   
+  queue <- reactive ({
+        paste("INSERT INTO `greenbook`.`incident_report` (
+              `incident_id`,
+              `cadet_fname`,
+              `cadet_lname`,
+              `cadet_room`,
+              `incident_time`,
+              `incident_date`,
+              `officer_narrative`,
+              VALUES  (",
+              input$firstName,
+              input$firstName, 
+              input$lastName, 
+              input$roomNum, 
+              input$time, 
+              input$date, 
+              input$eventTag, 
+              input$narrative, 
+              input$file,
+              ";)")
+  })
+  output$incidentPOST
+  dbGetQuery(conn, queue)
 }
 
 shinyApp(ui, server)
