@@ -45,19 +45,19 @@ ui <- fluidPage(
       tabItem(tabName = "incidentReport",
               h2("Incident Report"),
               box(
-                title = "Who", solidHeader = TRUE,
+                title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
                 textInput("firstName", "First Name:", width = '400px', placeholder = "First Name"),
                 textInput("midName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
                 textInput("lastName", "Last Name:", width = '400px', placeholder = "Last Name"),
                 numericInput("roomNum", "Room Number:", value = '109', width = '400px', min = 100, max = 3440 )
               ),
               box(
-                title = "When", solidHeader = TRUE,
+                title = "When", status = "primary", solidHeader = TRUE, width = '250px',
                 dateInput("date", "Date of event:", width = '400px', value = Sys.Date()),
                 timeInput("time", "Time of event:", seconds = FALSE,  value = Sys.time())
               ),
               box(
-                title = "What", solidHeader = TRUE,
+                title = "What", status = "primary", solidHeader = TRUE, width = '250px',
                 selectInput("eventTag", "Event Type:", 
                             c("Choose one",
                               "Alcohol offense" = "alc",
@@ -67,7 +67,7 @@ ui <- fluidPage(
                             )
                 ),
                 textAreaInput(
-                  "narrative", "Narrative:", width = '400px'
+                  "narrative", "Narrative:", width = '450px', height = '170px'
                 ),
                 fileInput("file", "Attach Picture(s)", multiple = TRUE)
               ),
@@ -75,7 +75,32 @@ ui <- fluidPage(
               actionButton("doTheButtonThing", "Submit")
       ),
       tabItem(tabName = "dailyReport",
-              h2("Daily Report")
+              h2("Daily Report"),
+              box(
+                title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
+                textInput("dailyOfficer", "Officer Name:", width = '400px', placeholder = "Last Name")
+              ),
+              box(
+                title = "When", status = "primary", solidHeader = TRUE, width = '250px',
+                dateInput("dailyDate", "Date of event:", width = '400px', value = Sys.Date()),
+                timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
+              ),
+              box(
+                title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+                selectInput("dailyEventTag", "Event Type:", 
+                            c("Choose one",
+                              "Example 1" = "exm1",
+                              "Example 2" = "exm2",
+                              "Example 3" = "exm3",
+                              "Example 4" = "exm4"
+                            )
+                ),
+                textAreaInput(
+                  "dailyNarrative", "Narrative:", width = '450px', height = '170px'
+                )
+              ),
+              
+              actionButton("dailyReportSubmit", "Submit")
       ),
       tabItem(tabName = "searchReports",
               h2("Search Reports"),
@@ -102,9 +127,11 @@ server <- function(input, output, session) {
   ))
   
   databaseName <- "greenbook"
-  table <- "incident_report"
+  
+  
+  
   observeEvent(input$doTheButtonThing,{
-    
+    table <- "incident_report"
     # Connect to the database
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
@@ -115,11 +142,29 @@ server <- function(input, output, session) {
       VALUES('", input$firstName, "', ", "'", input$midName, "', ", "'", input$lastName, "', ", "'", input$roomNum, "', ", "'", input$time, "', ", "'", input$date, "', ", "'", input$eventTag, "', ", "'", input$narrative, "', ", "'", input$file, "')"),
       table, 
       paste(names(data), collapse = ", "))
-    
     # Submit the update query and disconnect
     dbGetQuery(db, query)
     dbDisconnect(db)
   })
+  
+  observeEvent(input$dailyReportSubmit,{
+    table <- "daily_report"
+    
+    db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
+                    port = options()$mysql$port, user = options()$mysql$user,
+                    password = options()$mysql$password)
+    
+    query <- sprintf(paste(
+      "INSERT INTO `greenbook`.`daily_report` (`officer_id`, `daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`) 
+      VALUES('", input$dailyOfficer, "', ", "'", input$dailyDate, "', ", "'", input$dailyTime, "', ", "'", input$dailyEventTag, "', ", "'", input$dailyNarrative,"')"),
+
+      table, 
+      paste(names(data), collapse = ", "))
+    
+    dbGetQuery(db, query)
+    dbDisconnect(db)
+  })
+  
 }
 
 shinyApp(ui, server)
