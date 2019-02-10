@@ -9,7 +9,9 @@ library(dplyr)
 library(dbplyr)
 library(pool)
 
-ui <- fluidPage(dashboardPage(
+ui <- fluidPage(
+  tags$head(tags$script(src = "message-handler.js")), 
+  dashboardPage(
   skin = "green",
   dashboardHeader(title = "VMI Green Book"),
   dashboardSidebar(
@@ -70,7 +72,7 @@ ui <- fluidPage(dashboardPage(
                 fileInput("file", "Attach Picture(s)", multiple = TRUE)
               ),
               
-              actionButton("incidentPOST", "Submit")
+              actionButton("doTheButtonThing", "Submit")
       ),
       tabItem(tabName = "dailyReport",
               h2("Daily Report")
@@ -85,42 +87,39 @@ ui <- fluidPage(dashboardPage(
 )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
-  conn = dbConnect(MySQL(),
-          user='root',
-          password='root',
-          dbname='greenbook',
-          host='localhost')
-
-  observeEvent(input$incidentPOST, {
-    v$doPlot <- input$incidentPOST
+  observeEvent(input$doTheButtonThing, {
+    session$sendCustomMessage(type = 'testmessage',
+                              message = 'You clicked the button. Congrats you moron.')
   })
   
+  options(mysql = list(
+    "host" = "localhost",
+    "port" = 3306,
+    "user" = "root",
+    "password" = "root"
+  ))
   
-  queue <- reactive ({
-        paste("INSERT INTO `greenbook`.`incident_report` (
-              `incident_id`,
-              `cadet_fname`,
-              `cadet_lname`,
-              `cadet_room`,
-              `incident_time`,
-              `incident_date`,
-              `officer_narrative`,
-              VALUES  (",
-              input$firstName,
-              input$firstName, 
-              input$lastName, 
-              input$roomNum, 
-              input$time, 
-              input$date, 
-              input$eventTag, 
-              input$narrative, 
-              input$file,
-              ";)")
+  databaseName <- "greenbook"
+  table <- "incident_report"
+  observeEvent(input$doTheButtonThing,{
+    
+    # Connect to the database
+    db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
+                    port = options()$mysql$port, user = options()$mysql$user,
+                    password = options()$mysql$password)
+    # Construct the update query by looping over the data fields
+    query <- sprintf(paste(
+      "INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`) 
+      VALUES('", input$firstName, "', ", "'", input$midName, "', ", "'", input$lastName, "', ", "'", input$roomNum, "', ", "'", input$time, "', ", "'", input$date, "', ", "'", input$eventTag, "', ", "'", input$narrative, "', ", "'", input$file, "')"),
+      table, 
+      paste(names(data), collapse = ", "))
+    
+    # Submit the update query and disconnect
+    dbGetQuery(db, query)
+    dbDisconnect(db)
   })
-  output$incidentPOST
-  dbGetQuery(conn, queue)
 }
 
 shinyApp(ui, server)
