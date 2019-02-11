@@ -57,4 +57,19 @@ server <- function(input, output, session) {
     reset("dailyReportForm")
     shinyalert("Success!", "You have submitted your daily report.", type = "success")
   })
+  
+  observeEvent(input$searchButton, {
+    table <- "incident_report"
+    # Connect to the database
+    db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
+                    port = options()$mysql$port, user = options()$mysql$user, 
+                    password = options()$mysql$password)
+    # Construct the fetching query
+    query <- sprintf("SELECT * FROM greenbook.incident_report", table)
+    # Submit the fetch query and disconnect
+    data <- dbGetQuery(db, query)
+    dbDisconnect(db)
+    output$tbl <- renderDataTable(data)
+  })
+  
 }

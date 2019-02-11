@@ -114,8 +114,38 @@ ui <- fluidPage(
         ),
         tabItem(tabName = "searchReports",
                 h2("Search Reports"),
-                textId = "searchText", buttonId = "searchButton",
-                label = "Search..."
+                box(
+                  title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
+                  textInput("searchFirstName", "First Name:", width = '400px', placeholder = "First Name"),
+                  textInput("searchMidName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
+                  textInput("searchLastName", "Last Name:", width = '400px', placeholder = "Last Name"),
+                  numericInput("searchRoomNum", "Room Number:", value = '100', width = '400px', min = 100, max = 3440 )
+                ),
+                box(
+                  title = "When", status = "primary", solidHeader = TRUE, width = '250px',
+                  dateInput("searchDate", "Date of event:", width = '400px')
+                ),
+                box(
+                  title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+                  selectInput("searchEventTag", "Event Type:", 
+                              c("Choose one",
+                                "Alcohol offense" = "alc",
+                                "Medical" = "emt",
+                                "Emergency" = "emg",
+                                "Other" = "other"
+                              )
+                  ),
+                  textAreaInput(
+                    "searchNarrative", "Narrative:", width = '450px', height = '170px'
+                  )
+                ),
+                
+                actionButton("searchButton", "Submit"),
+                
+                box(
+                  title = "Search", status = "primary", solidHeader = TRUE, width = '250px',
+                  tableOutput('tbl')
+                )
         )
       )
     )
