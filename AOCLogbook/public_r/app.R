@@ -115,8 +115,11 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   observeEvent(input$doTheButtonThing, {
-    session$sendCustomMessage(type = 'testmessage',
-                              message = 'You clicked the button. Congrats you moron.')
+    session$sendCustomMessage(type = 'testmessage', message = 'You clicked the button. Congrats you moron.')
+  })
+  
+  observeEvent(input$dailyReportSubmit, {
+    session$sendCustomMessage(type = 'testmessage', message = 'You clicked the button. Congrats you moron.')
   })
   
   options(mysql = list(
@@ -164,6 +167,8 @@ server <- function(input, output, session) {
     dbGetQuery(db, query)
     dbDisconnect(db)
   })
+  
+  
   
 }
 

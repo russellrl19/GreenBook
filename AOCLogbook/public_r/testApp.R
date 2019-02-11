@@ -9,7 +9,10 @@ library(dplyr)
 library(dbplyr)
 library(pool)
 
-ui <- dashboardPage(
+ui <- fluidPage(
+  tags$head(tags$script(src = "message-handler.js")), 
+  
+  dashboardPage(
   skin = "green",
   dashboardHeader(title = "VMI Green Book"),
   dashboardSidebar(
@@ -31,6 +34,7 @@ ui <- dashboardPage(
               box(
                 title = "When", solidHeader = TRUE,
                 dateInput("date", "Date of event:", width = '400px', value = Sys.Date()),
+                #numericInput("time", "Room Number:", value = '109', width = '400px', min = 100, max = 3440 )
                 timeInput("time", "Time of event:", seconds = FALSE,  value = Sys.time())
               ),
               box(
@@ -49,36 +53,21 @@ ui <- dashboardPage(
                 fileInput("file", "Attach Picture(s)", multiple = TRUE)
               ),
               
-              submitButton("Submit")
+              #("incidentButton", "Submit")
+              actionButton("doTheButtonThing", "Submit")
       )
     )
   )
-)
+))
 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
-  # saveData <- function(data) {
-  #   # Connect to the database
-  #   db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
-  #                   port = options()$mysql$port, user = options()$mysql$user, 
-  #                   password = options()$mysql$password)
-  #   # Construct the update query by looping over the data fields
-  #   query <- sprintf(
-  #     "INSERT INTO %s (%s) VALUES ('%s')",
-  #     table, 
-  #     paste(names(data), collapse = ", "),
-  #     paste(data, collapse = "', '")
-  #   )
-  #   # Submit the update query and disconnect
-  #   dbGetQuery(db, query)
-  #   dbDisconnect(db)
-  # }
+  observeEvent(input$doTheButtonThing, {
+    session$sendCustomMessage(type = 'testmessage',
+    message = 'You clicked the button. Congrats you moron.')
+  })
   
-  # VALUES ('3', 'ryan', 'russell', '109', '0142', '2/8/2019', 'bad boi');
-
-  # query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`incident_id`, `cadet_fname`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `officer_narrative`) VALUES ('4', 'ryan', 'russell', '109', '0142', '2/8/2019', 'bad boi')")
- 
    options(mysql = list(
     "host" = "localhost",
     "port" = 3306,
@@ -88,38 +77,78 @@ server <- function(input, output) {
   
   databaseName <- "greenbook"
   table <- "incident_report"
+  observeEvent(input$doTheButtonThing,{
   
-  saveData <- function(data) {
     # Connect to the database
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
     # Construct the update query by looping over the data fields
-    query <- sprintf("INSERT INTO `greenbook`.`incident_report` "("
-                       `incident_id`,
-                       `cadet_fname`,
-                       `cadet_lname`,
-                       `cadet_room`,
-                       `incident_time`,
-                       `incident_date`,
-                       `officer_narrative`,
-                       `officer_id`", ), "
-                       VALUES  (", 
-                          '5',
-                         "'", input$firstName, "', ",
-                         "'", input$lastName, "', ", 
-                         "'", input$roomNum, "', ", 
-                         "'", input$time, "', ", 
-                         "'", input$date, "', ", 
-                         "'", input$narrative, "', ", 
-                         "'", input$eventTag, "', ", 
-                         "'", input$file, "'", 
-                           ";)", )
+    query <- sprintf(paste(
+      "INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`) 
+      VALUES('", input$firstName, "', ", "'", input$midName, "', ", "'", input$lastName, "', ", "'", input$roomNum, "', ", "'", input$time, "', ", "'", input$date, "', ", "'", input$eventTag, "', ", "'", input$narrative, "', ", "'", input$file, "')"),
+      table, 
+      paste(names(data), collapse = ", "))
+    
     # Submit the update query and disconnect
     dbGetQuery(db, query)
     dbDisconnect(db)
-  }
-  
+  })
 }
 
 shinyApp(ui, server)
+
+
+# saveData <- function(data) {
+#   # Connect to the database
+#   db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
+#                   port = options()$mysql$port, user = options()$mysql$user, 
+#                   password = options()$mysql$password)
+#   # Construct the update query by looping over the data fields
+#   query <- sprintf(
+#     "INSERT INTO %s (%s) VALUES ('%s')",
+#     table, 
+#     paste(names(data), collapse = ", "),
+#     paste(data, collapse = "', '")
+#   )
+#   # Submit the update query and disconnect
+#   dbGetQuery(db, query)
+#   dbDisconnect(db)
+# }
+
+#   
+#   query <- sprintf(
+#     "INSERT INTO %s (%s) VALUES ('%s')",
+#     table, 
+#     paste(names(data), collapse = ", "),
+#     paste(data, collapse = "', '"))
+#   
+
+#   query <- sprintf(
+#     "INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`) 
+#     VALUES('input$firstName', 'input$midName', 'input$lastName', 'input$roomNum', input$time, 'input$date', 'input$eventTag', 'input$narrative', 'input$file')",
+#     table, 
+#     paste(names(data), collapse = ", "),
+#     paste(data, collapse = "', '"))   
+
+# query <- sprintf("INSERT INTO `greenbook`.`incident_report` (
+#       `cadet_fname`,
+#       `cadet_minitial`,
+#       `cadet_lname`,
+#       `cadet_room`,
+#       `incident_time`,
+#       `incident_date`,
+#       `incident_type`,
+#       `officer_narrative`,
+#       `incident_attachment`)
+#       VALUES (
+#       'Ryan',
+#       'Logan',
+#       'Russell',
+#       '109',
+#       '0045',
+#       '2/10/2019',
+#       'alcohol',
+#       'Why is he doing this to himself??',
+#       ''
+#       )" )
