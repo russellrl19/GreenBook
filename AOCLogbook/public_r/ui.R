@@ -10,7 +10,7 @@ library(gWidgets)
 library(dplyr)
 library(dbplyr)
 library(pool)
-library(shinyjs)
+library(shinyalert)
 
 ui <- fluidPage(
   tags$head(tags$script(src = "message-handler.js")), 
@@ -47,8 +47,9 @@ ui <- fluidPage(
         ),
         tabItem(tabName = "incidentReport",
                 h2("Incident Report"),
-                useShinyjs(), div(id = "incidentReset", 
-                box( id ="incidentReport",
+                useShinyjs(),
+                div(id = "incidentForm", 
+                box(
                   title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
                   textInput("firstName", "First Name:", width = '400px', placeholder = "First Name"),
                   textInput("midName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
@@ -76,11 +77,13 @@ ui <- fluidPage(
                   fileInput("file", "Attach Picture(s)", multiple = TRUE)
                 )),
                 actionButton("incidentReset", "Clear"),
+                useShinyalert(),
                 actionButton("incidentSubmit", "Submit")
         ),
         tabItem(tabName = "dailyReport",
                 h2("Daily Report"),
-                useShinyjs(), div(id = "dailyReportReset", 
+                useShinyjs(),
+                div(id = "dailyReportForm", 
                 box(
                   title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
                   textInput("dailyOfficer", "Officer Name:", width = '400px', placeholder = "Last Name")
@@ -103,10 +106,11 @@ ui <- fluidPage(
                   textAreaInput(
                     "dailyNarrative", "Narrative:", width = '450px', height = '170px'
                   )
-                ),
+                )),
                 actionButton("dailyReportReset", "Clear"),
+                useShinyalert(),
                 actionButton("dailyReportSubmit", "Submit")
-        )),
+        ),
         tabItem(tabName = "searchReports",
                 h2("Search Reports"),
                 textId = "searchText", buttonId = "searchButton",

@@ -1,21 +1,13 @@
 ## server.R ##
 
 server <- function(input, output, session) {
-  
-  observeEvent(input$incidentSubmit, {
-    session$sendCustomMessage(type = 'testmessage', message = 'You clicked the button. Congrats you moron.')
+
+  observeEvent(input$incidentReset, {
+    reset("incidentForm")
   })
   
   observeEvent(input$incidentReset, {
-    reset("incidentReset")
-  })
-  
-  observeEvent(input$dailyReportSubmit, {
-    session$sendCustomMessage(type = 'testmessage', message = 'You clicked the button. Congrats you moron.')
-  })
-  
-  observeEvent(input$dailyReportReset, {
-    reset("dailyReportReset")
+    reset("dailyReportForm")
   })
   
   options(mysql = list(
@@ -26,8 +18,6 @@ server <- function(input, output, session) {
   ))
   
   databaseName <- "greenbook"
-  
-  
   
   observeEvent(input$incidentSubmit,{
     table <- "incident_report"
@@ -43,8 +33,9 @@ server <- function(input, output, session) {
       paste(names(data), collapse = ", "))
     # Submit the update query and disconnect
     dbGetQuery(db, query)
+    reset("incidentForm")
     dbDisconnect(db)
-    reset("incidentReset")
+    shinyalert("Success!", "You have submitted your daily report.", type = "success")
   })
   
   observeEvent(input$dailyReportSubmit,{
@@ -63,6 +54,7 @@ server <- function(input, output, session) {
     
     dbGetQuery(db, query)
     dbDisconnect(db)
-    reset("dailyReportReset")
+    reset("dailyReportForm")
+    shinyalert("Success!", "You have submitted your daily report.", type = "success")
   })
 }
