@@ -10,6 +10,7 @@ library(gWidgets)
 library(dplyr)
 library(dbplyr)
 library(pool)
+library(shinyjs)
 library(shinyalert)
 
 ui <- fluidPage(
