@@ -65,7 +65,7 @@ ui <- fluidPage(
                 box(
                   title = "What", status = "primary", solidHeader = TRUE, width = '250px',
                   selectInput("eventTag", "Event Type:", 
-                              c("Choose one",
+                              c("Choose one" = "",
                                 "Alcohol offense" = "alc",
                                 "Medical" = "emt",
                                 "Emergency" = "emg",

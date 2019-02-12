@@ -11,10 +11,10 @@ server <- function(input, output, session) {
   })
   
   options(mysql = list(
-    "host" = "localhost",
+    "host" = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
     "port" = 3306,
-    "user" = "root",
-    "password" = "root"
+    "user" = "greenbookadmin",
+    "password" = "~L7pPw}UZ;8*"
   ))
   
   databaseName <- "greenbook"
