@@ -2,7 +2,39 @@ library(shiny)
 library(shinydashboard)
 library(shinyTime)
 
-ui <- dashboardPage(
+my_username <- "vmi"
+my_password <- "123"
+
+###########################/ui.R/##################################
+
+ui <- dashboardPage(header,sidebar,dashboardBody)
+
+###########################/server.R/##################################
+
+server <- function(input, output, session) {
+  Logged <- FALSE
+  
+  USER <<- reactiveValues(Logged = Logged)
+  
+  observe({ 
+    if (USER$Logged == FALSE) {
+      if (!is.null(input$Login)) {
+        if (input$Login > 0) {
+          Username <- isolate(input$userName)
+          Password <- isolate(input$passwd)
+          Id.username <- which(my_username == Username)
+          Id.password <- which(my_password == Password)
+          if (length(Id.username) > 0 & length(Id.password) > 0) {
+            if (Id.username == Id.password) {
+              USER$Logged <<- TRUE
+            } 
+          }
+        } 
+      }
+    }    
+  })
+
+output$ui <- dashboardPage(
   skin = "green",
   dashboardHeader(title = "VMI Green Book"),
   dashboardSidebar(
@@ -82,6 +114,7 @@ server <- function(input, output) {
   
   output$value <- renderText({ input$caption })
   
+  }
 }
 
 shinyApp(ui, server)

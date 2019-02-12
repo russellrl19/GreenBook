@@ -2,6 +2,13 @@ library(shiny)
 library(shinydashboard)
 library(shinyTime)
 
+ui = dashboardPage(
+  dashboardHeader(),
+  dashboardSidebar(),
+  dashboardBody(),
+  title = "Dashboard example"
+)
+
 ui <- dashboardPage(
   skin = "green",
   dashboardHeader(title = "VMI Green Book"),
