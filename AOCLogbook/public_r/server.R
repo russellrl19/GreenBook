@@ -10,6 +10,10 @@ server <- function(input, output, session) {
     reset("dailyReportForm")
   })
   
+  observeEvent(input$SearchReset, {
+    reset("searchForm")
+  })
+  
   options(mysql = list(
     "host" = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
     "port" = 3306,
@@ -48,7 +52,6 @@ server <- function(input, output, session) {
     query <- sprintf(paste(
       "INSERT INTO `greenbook`.`daily_report` (`officer_id`, `daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`) 
       VALUES('", input$dailyOfficer, "', ", "'", input$dailyDate, "', ", "'", input$dailyTime, "', ", "'", input$dailyEventTag, "', ", "'", input$dailyNarrative,"')"),
-      
       table, 
       paste(names(data), collapse = ", "))
     
@@ -65,11 +68,14 @@ server <- function(input, output, session) {
                     port = options()$mysql$port, user = options()$mysql$user, 
                     password = options()$mysql$password)
     # Construct the fetching query
-    query <- sprintf("SELECT * FROM greenbook.incident_report", table)
+    query <- sprintf(paste(
+      #"SELECT * FROM greenbook.incident_report WHERE cadet_fname = ", "'", input$searchFirstName, "'"),
+      "SELECT * FROM greenbook.incident_report WHERE cadet_fname = '", input$searchFirstName, "'"),
+      table)
     # Submit the fetch query and disconnect
     data <- dbGetQuery(db, query)
     dbDisconnect(db)
-    output$tbl <- renderDataTable(data)
+    output$table <- renderTable(data)
   })
   
 }
