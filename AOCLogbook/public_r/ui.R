@@ -31,6 +31,7 @@ ui <- fluidPage(
       tabItems(
         tabItem(tabName = "dashboard",
                 h2("Dashboard")
+                #box here called ~"get recent stuff"
         ),
         tabItem(tabName = "dataAnalysis",
                 h2("Data Analysis"),

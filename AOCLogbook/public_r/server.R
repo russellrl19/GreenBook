@@ -23,6 +23,19 @@ server <- function(input, output, session) {
   
   databaseName <- "greenbook"
   
+  ##Dashboard SQL HERE##
+  
+  # Get all recent daily and incident reports
+  # save variables to get today's date and time
+  
+  # if current time is before 1700, get everything from yesterday @1701 until now
+  # if current time is after 1700, get everyhting posted from today @1701 until now
+  
+  # SELECT * 
+  #   FROM TABLE_NAME
+  # WHERE
+  # dob BETWEEN '1/21/2012' AND '2/22/2012'
+  
   observeEvent(input$incidentSubmit,{
     table <- "incident_report"
     # Connect to the database
