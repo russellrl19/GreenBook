@@ -47,21 +47,29 @@ ui <-
     ),
     dashboardBody(
       tabItems(
+        ## DASHBOARD ##
         tabItem(tabName = "dashboard",
           h2("Dashboard"),
-          box(
-            title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = 4,
-            column(12, tableOutput('dahboardIncident'))
+          h2("Recent TAC Data"),
+          fluidRow(
+            box(
+              title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = 6,
+              column(12, tableOutput('dahboardIncident'))
+            ),
+            box(
+              title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 6,
+              column(12, tableOutput('dahboardDaily'))
+            )
           ),
-          box(
-            title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
-            column(12, tableOutput('dahboardDaily'))
-          ),
-          box(
-            title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
-            column(12, tableOutput('dahboardCadet'))
+          br(), h2("Recent Cadet Data"),
+          fluidRow(
+            box(
+              title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 6,
+              column(12, tableOutput('dahboardCadet'))
+            )
           )
         ),
+        ## DATA ANALYSIS ##
         tabItem(tabName = "dataAnalysis",
           h2("Data Analysis"),
           box(
@@ -75,6 +83,7 @@ ui <-
             textInput("text", "Text input:")
           )
         ),
+        ## INCIDENT REPORT ##
         tabItem(tabName = "incidentReport",
           h2("Incident Report"),
           useShinyjs(),
@@ -116,6 +125,7 @@ ui <-
             )
           )
         ),
+        ## DAILY REPORT ##
         tabItem(tabName = "dailyReport",
           h2("Daily Report"), useShinyjs(),
           div(id = "dailyReportForm", 
@@ -147,6 +157,7 @@ ui <-
           useShinyalert(),
           actionButton("dailyReportSubmit", "Submit")
         ),
+        ## SEARCH REPORTS ##
         tabItem(tabName = "searchReports",
           h2("Search Reports"), useShinyjs(),
           div(id = "searchForm", 
