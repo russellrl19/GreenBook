@@ -13,6 +13,14 @@ library(pool)
 library(shinyjs)
 library(shinyalert)
 
+pool <- dbPool(
+  drv = RMySQL::MySQL(),
+  dbname = "greenbook",
+  host = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
+  username = "greenbookadmin",
+  password = "~L7pPw}UZ;8*"
+)
+
 ui <- 
   dashboardPage(
     skin = "green",
