@@ -13,8 +13,7 @@ library(pool)
 library(shinyjs)
 library(shinyalert)
 
-ui <- fluidPage(
-  tags$head(tags$script(src = "message-handler.js")), 
+ui <- 
   dashboardPage(
     skin = "green",
     dashboardHeader(title = "VMI Green Book",
@@ -78,39 +77,45 @@ ui <- fluidPage(
                 )
         ),
         tabItem(tabName = "incidentReport",
-                h2("Incident Report"),
-                useShinyjs(),
-                div(id = "incidentForm", 
+          h2("Incident Report"),
+          useShinyjs(),
+          div(id = "incidentForm",
+            fluidRow(
+              column(width = 1),
+              column(width = 5,
                 box(
-                  title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
-                  textInput("firstName", "First Name:", width = '400px', placeholder = "First Name"),
-                  textInput("midName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
-                  textInput("lastName", "Last Name:", width = '400px', placeholder = "Last Name", value = NULL),
-                  numericInput("roomNum", "Room Number:", value = '109', width = '400px', min = 100, max = 3440 )
+                  title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
+                  textInput("firstName", "First Name:", width = NULL, placeholder = "First Name"),
+                  textInput("midName", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+                  textInput("lastName", "Last Name:", width = NULL, placeholder = "Last Name", value = NULL),
+                  numericInput("roomNum", "Room Number:", value = '109', width = NULL, min = 100, max = 3440 )
                 ),
                 box(
-                  title = "When", status = "primary", solidHeader = TRUE, width = '250px',
+                  title = "When", status = "primary", solidHeader = TRUE, width = NULL,
                   dateInput("date", "Date of event:", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),
                   timeInput("time", "Time of event:", seconds = FALSE,  value = Sys.time())
                 ),
                 box(
-                  title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+                  title = "What", status = "primary", solidHeader = TRUE, width = NULL,
                   selectInput("eventTag", "Event Type:", 
-                              c("Choose one" = "",
-                                "Alcohol offense" = "alc",
-                                "Medical" = "emt",
-                                "Emergency" = "emg",
-                                "Other" = "other"
-                              )
+                    c("Choose one" = "",
+                      "Alcohol offense" = "alc",
+                      "Medical" = "emt",
+                      "Emergency" = "emg",
+                      "Other" = "other"
+                    )
                   ),
                   textAreaInput(
-                    "narrative", "Narrative:", width = '450px', height = '170px'
+                    "narrative", "Narrative:", width = NULL, height = '170px'
                   ),
                   fileInput("file", "Attach Picture(s)", multiple = TRUE)
-                )),
+                ),
                 actionButton("incidentReset", "Clear"),
                 useShinyalert(),
                 actionButton("incidentSubmit", "Submit")
+              )
+            )
+          )
         ),
         tabItem(tabName = "dailyReport",
                 h2("Daily Report"),
@@ -187,4 +192,3 @@ ui <- fluidPage(
       )
     )
   )
-)
