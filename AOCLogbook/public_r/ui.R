@@ -48,33 +48,32 @@ ui <-
     dashboardBody(
       tabItems(
         tabItem(tabName = "dashboard",
-                h2("Dashboard"),
-                box(
-                  title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = 4,
-                  column(12, tableOutput('dahboardIncident'))
-                ),
-                box(
-                  title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
-                  column(12, tableOutput('dahboardDaily'))
-                ),
-                box(
-                  title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
-                  column(12, tableOutput('dahboardCadet'))
-                )
+          h2("Dashboard"),
+          box(
+            title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = 4,
+            column(12, tableOutput('dahboardIncident'))
+          ),
+          box(
+            title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
+            column(12, tableOutput('dahboardDaily'))
+          ),
+          box(
+            title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
+            column(12, tableOutput('dahboardCadet'))
+          )
         ),
         tabItem(tabName = "dataAnalysis",
-                h2("Data Analysis"),
-                box(
-                  title = "Histogram", status = "primary", solidHeader = TRUE,
-                  collapsible = TRUE,
-                  plotOutput("plot3", height = 250)
-                ),
-                box(
-                  title = "Inputs", status = "warning", solidHeader = TRUE,
-                  "Box content here", br(), "More box content",
-                  sliderInput("slider", "Slider input:", 1, 100, 50),
-                  textInput("text", "Text input:")
-                )
+          h2("Data Analysis"),
+          box(
+            title = "Histogram", status = "primary", solidHeader = TRUE, collapsible = TRUE,
+            plotOutput("plot3", height = 250)
+          ),
+          box(
+            title = "Inputs", status = "warning", solidHeader = TRUE,
+            "Box content here", br(), "More box content",
+            sliderInput("slider", "Slider input:", 1, 100, 50),
+            textInput("text", "Text input:")
+          )
         ),
         tabItem(tabName = "incidentReport",
           h2("Incident Report"),
@@ -118,76 +117,74 @@ ui <-
           )
         ),
         tabItem(tabName = "dailyReport",
-                h2("Daily Report"),
-                useShinyjs(),
-                div(id = "dailyReportForm", 
-                  box(
-                    title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
-                    textInput("dailyOfficer", "Officer Name:", width = '400px', placeholder = "Last Name")
-                  ),
-                  box(
-                    title = "When", status = "primary", solidHeader = TRUE, width = '250px',
-                    dateInput("dailyDate", "Date of event:", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),
-                    timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
-                  ),
-                  box(
-                    title = "What", status = "primary", solidHeader = TRUE, width = '250px',
-                    selectInput("dailyEventTag", "Event Type:", 
-                                c("Choose one",
-                                  "Example 1" = "exm1",
-                                  "Example 2" = "exm2",
-                                  "Example 3" = "exm3",
-                                  "Example 4" = "exm4"
-                                )
-                    ),
-                    textAreaInput(
-                      "dailyNarrative", "Narrative:", width = '450px', height = '170px'
-                    )
-                  )
-                ),
-                actionButton("dailyReportReset", "Clear"),
-                useShinyalert(),
-                actionButton("dailyReportSubmit", "Submit")
+          h2("Daily Report"), useShinyjs(),
+          div(id = "dailyReportForm", 
+            box(
+              title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
+              textInput("dailyOfficer", "Officer Name:", width = '400px', placeholder = "Last Name")
+            ),
+            box(
+              title = "When", status = "primary", solidHeader = TRUE, width = '250px',
+              dateInput("dailyDate", "Date of event:", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),
+              timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
+            ),
+            box(
+              title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+              selectInput("dailyEventTag", "Event Type:", 
+                c("Choose one",
+                  "Example 1" = "exm1",
+                  "Example 2" = "exm2",
+                  "Example 3" = "exm3",
+                  "Example 4" = "exm4"
+                )
+              ),
+              textAreaInput(
+              "dailyNarrative", "Narrative:", width = '450px', height = '170px'
+              )
+            )
+          ),
+          actionButton("dailyReportReset", "Clear"),
+          useShinyalert(),
+          actionButton("dailyReportSubmit", "Submit")
         ),
         tabItem(tabName = "searchReports",
-                h2("Search Reports"),
-                useShinyjs(),
-                div(id = "searchForm", 
-                  box(
-                    title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
-                    textInput("searchFirstName", "First Name:", width = '400px', placeholder = "First Name"),
-                    textInput("searchMidName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
-                    textInput("searchLastName", "Last Name:", width = '400px', placeholder = "Last Name"),
-                    numericInput("searchRoomNum", "Room Number:", value = NULL, width = '400px', max = 3440 )
-                  ),
-                  box(
-                    title = "When", status = "primary", solidHeader = TRUE, width = '250px',
-                    dateInput("fromSearchDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
-                    dateInput("toSearchDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px')
-                  ),
-                  box(
-                    title = "What", status = "primary", solidHeader = TRUE, width = '250px',
-                    selectInput("searchEventTag", "Event Type:", 
-                                c("Choose one",
-                                  "Alcohol offense" = "alc",
-                                  "Medical" = "emt",
-                                  "Emergency" = "emg",
-                                  "Other" = "other"
-                                )
-                    ),
-                    textAreaInput(
-                      "searchNarrative", "Narrative:", width = '450px', height = '170px'
-                    )
-                  )
-                ),
-                actionButton("SearchReset", "Clear"),
-                actionButton("searchButton", "Submit"),
-                div(id = "searchResults",
-                  box(
-                    title = "Search", status = "primary", solidHeader = TRUE, width = '250px',
-                    column(12, tableOutput('table'))
-                  )
+          h2("Search Reports"), useShinyjs(),
+          div(id = "searchForm", 
+            box(
+              title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
+              textInput("searchFirstName", "First Name:", width = '400px', placeholder = "First Name"),
+              textInput("searchMidName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
+              textInput("searchLastName", "Last Name:", width = '400px', placeholder = "Last Name"),
+              numericInput("searchRoomNum", "Room Number:", value = NULL, width = '400px', max = 3440 )
+            ),
+            box(
+              title = "When", status = "primary", solidHeader = TRUE, width = '250px',
+              dateInput("fromSearchDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
+              dateInput("toSearchDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px')
+            ),
+            box(
+              title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+              selectInput("searchEventTag", "Event Type:", 
+                c("Choose one",
+                  "Alcohol offense" = "alc",
+                  "Medical" = "emt",
+                  "Emergency" = "emg",
+                  "Other" = "other"
                 )
+              ),
+              textAreaInput(
+                "searchNarrative", "Narrative:", width = '450px', height = '170px'
+              )
+            )
+          ),
+          actionButton("SearchReset", "Clear"),
+          actionButton("searchButton", "Submit"),
+          div(id = "searchResults",
+            box(
+              title = "Search", status = "primary", solidHeader = TRUE, width = '250px',
+              column(12, tableOutput('table'))
+            )
+          )
         )
       )
     )
