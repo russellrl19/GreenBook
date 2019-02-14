@@ -49,8 +49,19 @@ ui <- fluidPage(
     dashboardBody(
       tabItems(
         tabItem(tabName = "dashboard",
-                h2("Dashboard")
-                #box here called ~"get recent stuff"
+                h2("Dashboard"),
+                box(
+                  title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = 4,
+                  column(12, tableOutput('dahboardIncident'))
+                ),
+                box(
+                  title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
+                  column(12, tableOutput('dahboardDaily'))
+                ),
+                box(
+                  title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 4,
+                  column(12, tableOutput('dahboardCadet'))
+                )
         ),
         tabItem(tabName = "dataAnalysis",
                 h2("Data Analysis"),
