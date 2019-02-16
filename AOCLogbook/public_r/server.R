@@ -4,20 +4,20 @@ server <- function(input, output, session) {
 
 ## DATABASE SETUP ##
   # FOR AWS #
-  options(mysql = list(
-    "host" = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
-    "port" = 3306,
-    "user" = "greenbookadmin",
-    "password" = "~L7pPw}UZ;8*"
-  ))
+  # options(mysql = list(
+  #   "host" = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
+  #   "port" = 3306,
+  #   "user" = "greenbookadmin",
+  #   "password" = "~L7pPw}UZ;8*"
+  # ))
 
   # FOR LOCAL #
-  # options(mysql = list(
-  #   "host" = "localhost",
-  #   "port" = 3306,
-  #   "user" = "root",
-  #   "password" = "root"
-  # ))
+  options(mysql = list(
+    "host" = "localhost",
+    "port" = 3306,
+    "user" = "root",
+    "password" = "root"
+  ))
   
   
 ## DATABASE SETUP ##
@@ -25,6 +25,33 @@ server <- function(input, output, session) {
   db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                   port = options()$mysql$port, user = options()$mysql$user, 
                   password = options()$mysql$password)
+
+
+## LOGIN SETUP ##
+  shinyjs::hide("userForm")
+  loggedIn <- FALSE
+  observeEvent(input$submitLogin,{
+    databaseName <- "greenbook"
+    table <- "user_data"
+    db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
+                    port = options()$mysql$port, user = options()$mysql$user,
+                    password = options()$mysql$password)
+    query <- sprintf(paste(
+      "SELECT user_id FROM greenbook.user_data
+      WHERE user_username = '", input$username, "' AND user_password = '", input$password, "';"),
+      table, 
+      paste(names(data), collapse = ", "))
+    data <- dbGetQuery(db, query)
+    dbDisconnect(db)
+    if((is.na(data$user_id[1])) == TRUE){
+      shinyalert("Uh oh!", "Please enter a valid username and password", type = "error")
+    }
+    else{
+      shinyjs::show("userForm")
+      shinyjs::hide(id = "loginForm")
+      loggedIn <- TRUE
+    }
+  })
   
   
 ## DASHBOARD UPDATES ##

@@ -7,42 +7,33 @@ library(RMySQL)
 library(dbConnect)
 library(DBI)
 library(gWidgets)
-library(dplyr)
-library(dbplyr)
-library(pool)
+# library(dplyr)   # Get to work in putty
+# library(dbplyr)  # Get to work in putty
+# library(pool)    # Get to work in putty
 library(shinyjs)
 library(shinyalert)
 
-pool <- dbPool(
-  drv = RMySQL::MySQL(),
-  dbname = "greenbook",
-  host = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
-  username = "greenbookadmin",
-  password = "~L7pPw}UZ;8*"
-)
-
-ui <- 
-  dashboardPage(
+ui <- dashboardPage(
     skin = "green",
-    dashboardHeader(title = "VMI Green Book",
-      dropdownMenu(type = "messages",
-        messageItem(
-        from = "Sales Dept",
-        message = "Sales are steady this month."
-      ),
-      messageItem(
-        from = "New User",
-        message = "How do I register?",
-        icon = icon("question"),
-        time = "13:45"
-      ),
-      messageItem(
-        from = "Support",
-        message = "The new server is ready.",
-        icon = icon("life-ring"),
-        time = "2014-12-01"
-      )
-     )
+    dashboardHeader(title = "VMI Green Book"
+     #  dropdownMenu(type = "messages",
+     #    messageItem(
+     #    from = "Sales Dept",
+     #    message = "Sales are steady this month."
+     #  ),
+     #  messageItem(
+     #    from = "New User",
+     #    message = "How do I register?",
+     #    icon = icon("question"),
+     #    time = "13:45"
+     #  ),
+     #  messageItem(
+     #    from = "Support",
+     #    message = "The new server is ready.",
+     #    icon = icon("life-ring"),
+     #    time = "2014-12-01"
+     #  )
+     # )
     ),
     dashboardSidebar(
       sidebarMenu(
@@ -54,6 +45,11 @@ ui <-
       )
     ),
     dashboardBody(
+      div(id = "loginForm",
+      textInput("username", "Username:"),
+      passwordInput("password", "Password:"),
+      actionButton("submitLogin", "Submit")), 
+      div(id = "userForm",
       tabItems(
         ## DASHBOARD ##
         tabItem(tabName = "dashboard",
@@ -224,6 +220,7 @@ ui <-
             )
           )
         )
+      )
       )
     )
   )
