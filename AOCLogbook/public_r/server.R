@@ -50,9 +50,19 @@ server <- function(input, output, session) {
       shinyjs::show("userForm")
       shinyjs::hide(id = "loginForm")
       loggedIn <- TRUE
+      loggedInUsername <- input$username
+      loggedInUserID <- data$user_id
+
+      output$userpanel <- renderUI({
+        if(loggedIn == TRUE){
+          sidebarUserPanel(
+            span("Logged in as ", loggedInUsername),
+            subtitle = a(icon("sign-out"), "Logout", href="__logout__")
+          )
+        }
+      })
     }
   })
-  
   
 ## DASHBOARD UPDATES ##
   # Querey's for TAC if the current time is BEFORE 1700 #

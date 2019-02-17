@@ -15,27 +15,12 @@ library(shinyalert)
 
 ui <- dashboardPage(
     skin = "green",
-    dashboardHeader(title = "VMI Green Book"
-     #  dropdownMenu(type = "messages",
-     #    messageItem(
-     #    from = "Sales Dept",
-     #    message = "Sales are steady this month."
-     #  ),
-     #  messageItem(
-     #    from = "New User",
-     #    message = "How do I register?",
-     #    icon = icon("question"),
-     #    time = "13:45"
-     #  ),
-     #  messageItem(
-     #    from = "Support",
-     #    message = "The new server is ready.",
-     #    icon = icon("life-ring"),
-     #    time = "2014-12-01"
-     #  )
-     # )
-    ),
+    dashboardHeader(title = "VMI Green Book"),
     dashboardSidebar(
+      # Custom CSS to hide the default logout panel
+      tags$head(tags$style(HTML('.shiny-server-account { display: none; }'))),
+      # The dynamically-generated user panel
+      uiOutput("userpanel"),
       sidebarMenu(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
         menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),
