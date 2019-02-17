@@ -18,14 +18,6 @@ server <- function(input, output, session) {
     "user" = "root",
     "password" = "root"
   ))
-  
-  
-## DATABASE SETUP ##
-  databaseName <- "greenbook"
-  db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
-                  port = options()$mysql$port, user = options()$mysql$user, 
-                  password = options()$mysql$password)
-
 
 ## LOGIN SETUP ##
   shinyjs::hide("userForm")
@@ -65,33 +57,41 @@ server <- function(input, output, session) {
   })
   
 ## DASHBOARD UPDATES ##
-  # Querey's for TAC if the current time is BEFORE 1700 #
-  if (substring(Sys.time(), 12) < '17:00:00') {
-    query1 <- sprintf(paste(
-      "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
-      OR incident_date = '", Sys.Date(), "'"),
-      "incident_report")
-    query2 <- sprintf(paste(
-      "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
-      OR daily_date = '", Sys.Date(), "'"),
-      "daily_report")
-  }
+  toListen <- reactive({
+    list(input$submitLogin,input$incidentSubmit,input$dailyReportSubmit)
+  })
   
-  # Querey's for TAC if the current time is AFTER 1700 #
-  else {
-    query1 <- sprintf(paste(
-      "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE incident_date = '", Sys.Date(), "' AND incident_time  > ' 17:00:00 '"),
-      "incident_report")
-    query2 <- sprintf(paste(
-      "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
-      "daily_report")
-  }
-  
-  incidentData <- dbGetQuery(db, query1)
-  output$dahboardIncident <- renderTable(incidentData)
-  dailyData <- dbGetQuery(db, query2)
-  output$dahboardDaily <- renderTable(dailyData)
-  dbDisconnect(db)
+  observeEvent(toListen(), {
+      databaseName <- "greenbook"
+      db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
+                      port = options()$mysql$port, user = options()$mysql$user, 
+                      password = options()$mysql$password)
+      # Querey's for TAC if the current time is BEFORE 1700 #
+      if(substring(Sys.time(), 12) < '17:00:00'){
+        query1 <- sprintf(paste(
+          "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
+          OR incident_date = '", Sys.Date(), "'"),
+          "incident_report")
+        query2 <- sprintf(paste(
+          "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+          OR daily_date = '", Sys.Date(), "'"),
+          "daily_report")
+      }
+      # Querey's for TAC if the current time is AFTER 1700 #
+      else{
+        query1 <- sprintf(paste(
+          "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE incident_date = '", Sys.Date(), "' AND incident_time  > ' 17:00:00 '"),
+          "incident_report")
+        query2 <- sprintf(paste(
+          "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
+          "daily_report")
+      }
+      incidentData <- dbGetQuery(db, query1)
+      output$dahboardIncident <- renderTable(incidentData)
+      dailyData <- dbGetQuery(db, query2)
+      output$dahboardDaily <- renderTable(dailyData)
+      dbDisconnect(db)
+  })
   
   
 ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
