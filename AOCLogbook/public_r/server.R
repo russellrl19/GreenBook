@@ -137,7 +137,13 @@ server <- function(input, output, session) {
                     port = options()$mysql$port, user = options()$mysql$user, 
                     password = options()$mysql$password)
     query <- sprintf(paste(
-      "SELECT * FROM greenbook.incident_report WHERE cadet_fname = '", input$searchFirstName, "'"),
+      "SELECT * FROM greenbook.incident_report 
+      WHERE cadet_fname = '", input$searchFirstName, " ' IS NOT NULL
+      OR cadet_minitial = '", input$searchMidName, "' IS NOT NULL
+      OR cadet_lname = '", input$searchLastName, "' IS NOT NULL
+      OR cadet_room ='", input$searchRoomNum, "' IS NOT NULL
+      OR incident_date ='", input$fromSearchDate, "' IS NOT NULL
+      OR incident_type ='", input$searchEventTag, "' IS NOT NULL"),
       table)
     data <- dbGetQuery(db, query)
     dbDisconnect(db)

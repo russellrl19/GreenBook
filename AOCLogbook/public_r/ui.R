@@ -175,15 +175,12 @@ ui <- dashboardPage(
                 box(
                   title = "What", status = "primary", solidHeader = TRUE, width = '250px',
                   selectInput("searchEventTag", "Event Type:", 
-                    c("Choose one",
+                    c("Choose one" = "",
                       "Alcohol offense" = "alc",
                       "Medical" = "emt",
                       "Emergency" = "emg",
                       "Other" = "other"
                     )
-                  ),
-                  textAreaInput(
-                    "searchNarrative", "Narrative:", width = '450px', height = '170px'
                   )
                 ),
                 actionButton("SearchReset", "Clear", class="btn-lg"),
