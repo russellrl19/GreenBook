@@ -28,7 +28,7 @@ server <- function(input, output, session) {
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
-    query <- sprintf(paste(
+    query <- sprintf(paste0(
       "SELECT user_id FROM greenbook.user_data
       WHERE user_username = '", input$username, "' AND user_password = '", input$password, "';"),
       table, 
@@ -68,21 +68,21 @@ server <- function(input, output, session) {
                       password = options()$mysql$password)
       # Querey's for TAC if the current time is BEFORE 1700 #
       if(substring(Sys.time(), 12) < '17:00:00'){
-        query1 <- sprintf(paste(
+        query1 <- sprintf(paste0(
           "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
           OR incident_date = '", Sys.Date(), "'"),
           "incident_report")
-        query2 <- sprintf(paste(
+        query2 <- sprintf(paste0(
           "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
           OR daily_date = '", Sys.Date(), "'"),
           "daily_report")
       }
       # Querey's for TAC if the current time is AFTER 1700 #
       else{
-        query1 <- sprintf(paste(
+        query1 <- sprintf(paste0(
           "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE incident_date = '", Sys.Date(), "' AND incident_time  > ' 17:00:00 '"),
           "incident_report")
-        query2 <- sprintf(paste(
+        query2 <- sprintf(paste0(
           "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
           "daily_report")
       }
@@ -95,16 +95,17 @@ server <- function(input, output, session) {
   
   
 ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
+  
+  # Incident Report Query #
   observeEvent(input$incidentSubmit,{
     table <- "incident_report"
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
-    query <- sprintf(paste(
-      "INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`) 
-      VALUES('", input$firstName, "', ", "'", input$midName, "', ", "'", input$lastName, "', ", "'", input$roomNum, "', ", "'", substring(gsub(":00 ", "", input$time), 11), "', ", "'", input$date, "', ", "'", input$eventTag, "', ", "'", input$narrative, "', ", "'", input$file, "')"),
-      table, 
-      paste(names(data), collapse = ", "))
+    query <- sprintf(paste0("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`)
+      VALUES('",input$firstName,"', '", input$midName, "', '", input$lastName, "', '", input$roomNum, "', '", substring(gsub(":00 ", "", input$time), 11), "', '", input$date, "', '", input$eventTag, "', '", input$narrative, "', '", input$file, "')"),
+      paste(names(data), collapse = ", "),
+      paste(names(data), collapse = "', '"))
     dbGetQuery(db, query)
     reset("incidentForm")
     dbDisconnect(db)
@@ -118,11 +119,12 @@ server <- function(input, output, session) {
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
     
-    query <- sprintf(paste(
+    query <- sprintf(paste0(
       "INSERT INTO `greenbook`.`daily_report` (`officer_id`, `daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`) 
       VALUES('", input$dailyOfficer, "', ", "'", input$dailyDate, "', ", "'", substring(gsub(":00 ", "", input$dailyTime), 11), "', ", "'", input$dailyEventTag, "', ", "'", input$dailyNarrative,"')"),
       table, 
-      paste(names(data), collapse = ", "))
+      paste(names(data), collapse = ", "),
+      paste(names(data), collapse = "', '"))
     
     dbGetQuery(db, query)
     dbDisconnect(db)
@@ -136,18 +138,30 @@ server <- function(input, output, session) {
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                     port = options()$mysql$port, user = options()$mysql$user, 
                     password = options()$mysql$password)
-    query <- sprintf(paste(
-      "SELECT * FROM greenbook.incident_report 
-      WHERE cadet_fname = '", input$searchFirstName, " ' IS NOT NULL
-      OR cadet_minitial = '", input$searchMidName, "' IS NOT NULL
-      OR cadet_lname = '", input$searchLastName, "' IS NOT NULL
-      OR cadet_room ='", input$searchRoomNum, "' IS NOT NULL
-      OR incident_date ='", input$fromSearchDate, "' IS NOT NULL
-      OR incident_type ='", input$searchEventTag, "' IS NOT NULL"),
-      table)
-    data <- dbGetQuery(db, query)
-    dbDisconnect(db)
-    output$table <- renderTable(data)
+    
+  #   if((is.null(input$searchFirstName) && is.null(input$searchMidName) && is.null(input$searchLastName) && is.null(input$searchRoomNum) && is.null(input$searchEventTag)) == TRUE){
+  #     query <- sprintf(paste0(
+  #       "SELECT * FROM greenbook.incident_report"), 
+  #       table,
+  #       paste(names(data), collapse = ", "),
+  #       paste(names(data), collapse = "', '"))
+  #   }
+  #   else{
+  #     query <- sprintf(paste0(
+  #       "SELECT * FROM greenbook.incident_report
+  #       WHERE (incident_date BETWEEN '", input$fromSearchDate, "' AND '", input$toSearchDate, "')
+  #         AND ('", input$searchFirstName, "' = '' OR cadet_fname = '", input$searchFirstName, "')
+  #         AND ('", input$searchMidName, "' = '' OR cadet_minitial = '", input$searchMidName, "')
+  #         AND ('", input$searchLastName, "' = '' OR cadet_lname = '", input$searchLastName, "')
+  #         AND ('", input$searchRoomNum, "' = '' OR cadet_room = '", input$searchRoomNum, "')
+  #         AND ('", input$searchEventTag, "' = '' OR incident_type = '", input$searchEventTag, "')"),
+  #         table,
+  #         paste(names(data), collapse = ", "),
+  #         paste(names(data), collapse = "', '"))
+  #   }
+  #   data <- dbGetQuery(db, query)
+  #   dbDisconnect(db)
+  #   output$table <- renderTable(data)
   })
   
   
