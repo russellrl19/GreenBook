@@ -7,18 +7,17 @@ library(RMySQL)
 library(dbConnect)
 library(DBI)
 library(gWidgets)
-library(dplyr)
-library(dbplyr)
-library(pool)
+library(dplyr)   # Get to work in putty
+library(dbplyr)  # Get to work in putty
+library(pool)    # Get to work in putty
 library(shinyjs)
 library(shinyalert)
 
-ui <- fluidPage(
-  tags$head(tags$script(src = "message-handler.js")), 
-  dashboardPage(
+ui <- dashboardPage(
     skin = "green",
     dashboardHeader(title = "VMI Green Book"),
     dashboardSidebar(
+      uiOutput("userpanel"),
       sidebarMenu(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
         menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),
@@ -28,96 +27,177 @@ ui <- fluidPage(
       )
     ),
     dashboardBody(
+      div(id = "loginForm",
+      textInput("username", "Username:"),
+      passwordInput("password", "Password:"),
+      actionButton("submitLogin", "Submit")), 
+      div(id = "userForm",
       tabItems(
+        ## DASHBOARD ##
         tabItem(tabName = "dashboard",
-                h2("Dashboard")
+          h2("Dashboard"),
+          h2("Recent TAC Data"),
+          fluidRow(
+            box(
+              title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = 6,
+              column(12, tableOutput('dahboardIncident'))
+            ),
+            box(
+              title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 6,
+              column(12, tableOutput('dahboardDaily'))
+            )
+          ),
+          br(), h2("Recent Cadet Data"),
+          fluidRow(
+            box(
+              title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 6,
+              column(12, tableOutput('dahboardCadet'))
+            )
+          )
         ),
+        ## DATA ANALYSIS ##
         tabItem(tabName = "dataAnalysis",
-                h2("Data Analysis"),
-                box(
-                  title = "Histogram", status = "primary", solidHeader = TRUE,
-                  collapsible = TRUE,
-                  plotOutput("plot3", height = 250)
-                ),
-                box(
-                  title = "Inputs", status = "warning", solidHeader = TRUE,
-                  "Box content here", br(), "More box content",
-                  sliderInput("slider", "Slider input:", 1, 100, 50),
-                  textInput("text", "Text input:")
-                )
+          h2("Data Analysis"),
+          box(
+            title = "Histogram", status = "primary", solidHeader = TRUE, collapsible = TRUE,
+            plotOutput("plot3", height = 250)
+          ),
+          box(
+            title = "Inputs", status = "warning", solidHeader = TRUE,
+            "Box content here", br(), "More box content",
+            sliderInput("slider", "Slider input:", 1, 100, 50),
+            textInput("text", "Text input:")
+          )
         ),
+        ## INCIDENT REPORT ##
         tabItem(tabName = "incidentReport",
-                h2("Incident Report"),
-                useShinyjs(),
-                div(id = "incidentForm", 
+          h2("Incident Report"),
+          useShinyjs(),
+          div(id = "incidentForm",
+            fluidRow(
+              column(width = 1),
+              column(width = 6,
                 box(
-                  title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
-                  textInput("firstName", "First Name:", width = '400px', placeholder = "First Name"),
-                  textInput("midName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
-                  textInput("lastName", "Last Name:", width = '400px', placeholder = "Last Name", value = NULL),
-                  numericInput("roomNum", "Room Number:", value = '109', width = '400px', min = 100, max = 3440 )
+                  title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
+                  textInput("firstName", "First Name:", width = NULL, placeholder = "First Name"),
+                  textInput("midName", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+                  textInput("lastName", "Last Name:", width = NULL, placeholder = "Last Name"),
+                  numericInput("roomNum", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
                 ),
                 box(
-                  title = "When", status = "primary", solidHeader = TRUE, width = '250px',
-                  dateInput("date", "Date of event:", width = '400px', value = Sys.Date()),
+                  title = "When", status = "primary", solidHeader = TRUE, width = NULL,
+                  dateInput("date", "Date of event:", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),
                   timeInput("time", "Time of event:", seconds = FALSE,  value = Sys.time())
                 ),
                 box(
-                  title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+                  title = "What", status = "primary", solidHeader = TRUE, width = NULL,
                   selectInput("eventTag", "Event Type:", 
-                              c("Choose one",
-                                "Alcohol offense" = "alc",
-                                "Medical" = "emt",
-                                "Emergency" = "emg",
-                                "Other" = "other"
-                              )
+                    c("Choose one" = "",
+                      "Alcohol offense" = "alc",
+                      "Medical" = "emt",
+                      "Emergency" = "emg",
+                      "Other" = "other"
+                    )
                   ),
-                  textAreaInput(
-                    "narrative", "Narrative:", width = '450px', height = '170px'
-                  ),
-                  fileInput("file", "Attach Picture(s)", multiple = TRUE)
-                )),
-                actionButton("incidentReset", "Clear"),
+                  textAreaInput("narrative", "Narrative:", width = NULL, height = '170px'),
+                  fileInput("file", "Attach Picture", width = NULL)
+                ),
+                actionButton("incidentReset", "Clear", class="btn-lg"),
                 useShinyalert(),
-                actionButton("incidentSubmit", "Submit")
+                actionButton("incidentSubmit", "Submit", class="btn-lg"),
+                br(), br()
+              )
+            )
+          )
         ),
+        ## DAILY REPORT ##
         tabItem(tabName = "dailyReport",
-                h2("Daily Report"),
-                useShinyjs(),
-                div(id = "dailyReportForm", 
+          h2("Daily Report"), useShinyjs(),
+          div(id = "dailyReportForm", 
+            fluidRow(
+              column(width = 1),
+              column(width = 6,
                 box(
-                  title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
-                  textInput("dailyOfficer", "Officer Name:", width = '400px', placeholder = "Last Name")
+                  title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
+                  textInput("dailyOfficer", "Officer Name:", width = NULL, placeholder = "Last Name")
                 ),
                 box(
-                  title = "When", status = "primary", solidHeader = TRUE, width = '250px',
-                  dateInput("dailyDate", "Date of event:", width = '400px', value = Sys.Date()),
+                  title = "When", status = "primary", solidHeader = TRUE, width = NULL,
+                  dateInput("dailyDate", "Date of event:", format = "mm-dd-yyyy", width = NULL, value = Sys.Date()),
                   timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
                 ),
                 box(
-                  title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+                  title = "What", status = "primary", solidHeader = TRUE, width = NULL,
                   selectInput("dailyEventTag", "Event Type:", 
-                              c("Choose one",
-                                "Example 1" = "exm1",
-                                "Example 2" = "exm2",
-                                "Example 3" = "exm3",
-                                "Example 4" = "exm4"
-                              )
+                    c("Choose one",
+                      "Example 1" = "exm1",
+                      "Example 2" = "exm2",
+                      "Example 3" = "exm3",
+                      "Example 4" = "exm4"
+                    )
                   ),
                   textAreaInput(
-                    "dailyNarrative", "Narrative:", width = '450px', height = '170px'
+                  "dailyNarrative", "Narrative:", width = NULL, height = '170px'
                   )
-                )),
-                actionButton("dailyReportReset", "Clear"),
+                ),
+                actionButton("dailyReportReset", "Clear", class="btn-lg"),
                 useShinyalert(),
-                actionButton("dailyReportSubmit", "Submit")
+                actionButton("dailyReportSubmit", "Submit", class="btn-lg"),
+                br(), br()
+              )
+            )
+          )
         ),
+        ## SEARCH REPORTS ##
         tabItem(tabName = "searchReports",
-                h2("Search Reports"),
-                textId = "searchText", buttonId = "searchButton",
-                label = "Search..."
+          h2("Search Reports"), useShinyjs(),
+          div(id = "searchForm",
+            fluidRow(
+              column(width = 1),
+              column(width = 6,
+                box(
+                  title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
+                  textInput("searchFirstName", "First Name:", width = '400px', placeholder = "First Name"),
+                  textInput("searchMidName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
+                  textInput("searchLastName", "Last Name:", width = '400px', placeholder = "Last Name"),
+                  numericInput("searchRoomNum", "Room Number:", value = NULL, width = '400px', max = 3440 )
+                ),
+                box(
+                  title = "When", status = "primary", solidHeader = TRUE, width = '250px',
+                  dateInput("fromSearchDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
+                  dateInput("toSearchDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px')
+                ),
+                box(
+                  title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+                  selectInput("searchEventTag", "Event Type:", 
+                    c("Choose one" = "",
+                      "Alcohol offense" = "alc",
+                      "Medical" = "emt",
+                      "Emergency" = "emg",
+                      "Other" = "other"
+                    )
+                  )
+                ),
+                actionButton("SearchReset", "Clear", class="btn-lg"),
+                actionButton("searchButton", "Submit", class="btn-lg"),
+                br(), br()
+              )
+            ),
+            fluidRow(
+              column(width = 1),
+              column(width = 12,
+                div(id = "searchResults",
+                  box(
+                    title = "Search", status = "primary", solidHeader = TRUE, width = '250px',
+                    column(12, tableOutput('table'))
+                  )
+                ),
+                br(), br()
+              )
+            )
+          )
         )
+      )
       )
     )
   )
-)
