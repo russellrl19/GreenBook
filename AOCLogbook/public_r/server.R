@@ -98,30 +98,19 @@ server <- function(input, output, session) {
   
   # Incident Report Query #
   observeEvent(input$incidentSubmit,{
-    # dataCheck <- reactive({
-    #   validate(
-    #     need(input$firstName != "", "Please enter a First Name"),
-    #     need(input$lastName != "", "Please enter a Last Name"),
-    #     need(input$time != "", "Please enter a valid time"),
-    #     need(input$date != "", "Please enter a valid date"),
-    #     need(input$eventTag != "", "Please enter a event type")
-    #   )
-    #   #get(input$data)
-    # }
+    
+    if((input$file == "") == FALSE){file1 <- (input$file)} else{file1 <- (paste0(""))}
     
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
     
-    on.exit(dbDisconnect(db))
-    sql <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`)
-    VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", input$firstName, input$midName, input$lastName, input$roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, input$file)
-    rs <- dbSendQuery(db, sql)
-    dbClearResult(rs)
+    query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`)
+    VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", input$firstName, input$midName, input$lastName, input$roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, file1)
 
-    #dbGetQuery(db, query)
+    dbGetQuery(db, query)
     reset("incidentForm")
-    # dbDisconnect(db)
+    dbDisconnect(db)
     shinyalert("Success!", "You have submitted your incident report.", type = "success")
   })
 
@@ -132,12 +121,9 @@ server <- function(input, output, session) {
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
     
-    query <- sprintf(paste0(
+    query <- sprintf(
       "INSERT INTO `greenbook`.`daily_report` (`officer_id`, `daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`) 
-      VALUES('", input$dailyOfficer, "', ", "'", input$dailyDate, "', ", "'", substring(gsub(":00 ", "", input$dailyTime), 11), "', ", "'", input$dailyEventTag, "', ", "'", input$dailyNarrative,"')"),
-      table, 
-      paste(names(data), collapse = ", "),
-      paste(names(data), collapse = "', '"))
+      VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyOfficer, input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, input$dailyNarrative)
     
     dbGetQuery(db, query)
     dbDisconnect(db)
@@ -148,43 +134,24 @@ server <- function(input, output, session) {
   # Searching Query #
   observeEvent(input$searchButton, {
     
-    if((input$searchFirstName == "") == TRUE){a <- NA}
-    else{a <- paste0("'", input$searchFirstName, "'")}
+    if((input$searchFirstName == "") == FALSE){a <- (paste0(" AND (cadet_fname = '", input$searchFirstName, "')"))} else{a <- (paste0(""))}
     
-    if((input$searchMidName == "") == TRUE){b <- NA}
-    else{b <- paste0("'", input$searchMidName, "'")}
+    if((input$searchMidName == "") == FALSE){b <- (paste0(" AND (cadet_minitial = '", input$searchMidName, "')"))} else{b <- (paste0(""))}
     
-    if((input$searchLastName == "") == TRUE){c <- NA}
-    else{c <- paste0("'", input$searchLastName, "'")}
+    if((input$searchLastName == "") == FALSE){c <- (paste0(" AND (cadet_lname = '", input$searchLastName, "')"))} else{c <- (paste0(""))}
     
-    if((input$searchRoomNum == "") == TRUE){
-      d <- NA
-    }
-    else{
-      d <- paste0("'", input$searchRoomNum, "'")
-    }
+    if((is.null(input$searchRoomNum))){d <- (paste0(" AND (cadet_room = '", input$searchRoomNum, "')"))} else{d <- (paste0(""))}
     
-    if((input$searchEventTag == "") == TRUE){e <- NA}
-    else{e <- paste0("'", input$searchEventTag, "'")}
-    
-    
+    if((input$searchEventTag == "") == FALSE){e <- (paste0(" AND (incident_type = '", input$searchEventTag, "')"))} else{e <- (paste0(""))}
     
     table <- "incident_report"
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                     port = options()$mysql$port, user = options()$mysql$user, 
                     password = options()$mysql$password)
-    
-    query <- sprintf(paste0(
+    query <- paste0(
       "SELECT * FROM greenbook.incident_report
-      WHERE (incident_date BETWEEN '", input$fromSearchDate, "' AND '", input$toSearchDate, "')
-        AND (", a, " IS NULL OR cadet_fname = ", a, ")
-        AND (", b, " IS NULL OR cadet_minitial = ", b, ")
-        AND (", c, " IS NULL OR cadet_lname = ", c, ")
-        AND (", d, " IS NULL OR cadet_room = ", d, ")
-        AND (", e, " IS NULL OR incident_type = ", e, ")"),
-        table,
-        paste(names(data), collapse = ", "),
-        paste(names(data), collapse = "', '"))
+    WHERE (incident_date BETWEEN '", input$fromSearchDate, "' AND '", input$toSearchDate, "')", 
+      a, b, c, d, e)
     data <- dbGetQuery(db, query)
     dbDisconnect(db)
     output$table <- renderTable(data)

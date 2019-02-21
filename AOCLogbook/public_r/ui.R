@@ -165,7 +165,7 @@ ui <- dashboardPage(
                   textInput("searchFirstName", "First Name:", width = '400px', placeholder = "First Name"),
                   textInput("searchMidName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
                   textInput("searchLastName", "Last Name:", width = '400px', placeholder = "Last Name"),
-                  numericInput("searchRoomNum", "Room Number:", value = 109, width = '400px', max = 3440 )
+                  numericInput("searchRoomNum", "Room Number:", value = NULL, width = '400px', max = 3440 )
                 ),
                 box(
                   title = "When", status = "primary", solidHeader = TRUE, width = '250px',
