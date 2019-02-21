@@ -69,9 +69,10 @@ ui <- dashboardPage(
                         )
             ),
             dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
-            dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px')
+            dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
+            actionButton("trendSubmit", "Submit", class="btn-lg")
           ),
-          box(title = "Trends!", status = "primary", solidHeader = TRUE, width = NULL,
+          box(title = "Trends!", status = "primary", solidHeader = TRUE,
             plotOutput("trendPlot")
           )
         ),

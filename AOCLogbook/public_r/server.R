@@ -91,6 +91,7 @@ server <- function(input, output, session) {
   })
   
 ## ANALYTICS TAB ##
+  observeEvent(input$trendSubmit,{
   db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                   port = options()$mysql$port, user = options()$mysql$user,
                   password = options()$mysql$password)
@@ -98,37 +99,63 @@ server <- function(input, output, session) {
         WHERE (incident_date BETWEEN '", input$fromTrendDate, "' AND '", input$toTrendDate, "') 
         AND (incident_type = '", input$trendType, "');")
   trendData <- dbGetQuery(db, trendQuery)
-  
+  dbDisconnect(db)
   output$trendPlot <- renderPlot({
-    plot(trendData)
+    # plot(trendData$incident_date, 
+    #      trendData$incident_time, 
+    #      xlim = (c("2019-01-01", "2019-02-21")), 
+    #      ylim = (c(00, 24)),
+    #      xlab = "Date",
+    #      ylab = "Time"
+    # )
+    plot(trendData$incident_date, trendData$incident_time,
+         ylim=c(as.POSIXct('00:00:00', format="%H:%M:%S"),
+                as.POSIXct('24:00:00', format="%H:%M:%S")),
+         # xlim=c(as.POSIXct('2019-01-01', format="%Y-%m-%d"),
+         #        as.POSIXct('2019-02-22', format="%Y-%m-%d")),
+         xlim=c(max(trendData$incident_date),min(trendData$incident_date)),
+         # xlim=as.Date(c('2019-02-00', '2019-02-22')),
+         xlab="Date of incident",
+         ylab="Time of incident"
+    )
+    #xlim=as.Date(c("2014-06-09", "2014-08-30"))
   })
+})
   
-#   # Run every 30 seconds
-#   QueriedData <- reactivePoll(30000,session, 
-#                               
-#                               #A function whose values over time will be tested for equality; inequality indicates that the underlying value has changed and needs to be invalidated and re-read using valueFunc
-#                               checkFunc = function(){ 
-#                                 
-#                                 # connect
-#                                 con <- DBI::dbConnect(RMariaDB::MariaDB(), 
-#                                                       #RMySQL::MySQL(),
-#                                                       host = '192.168.0.0',
-#                                                       user = 'xkcd',
-#                                                       password = 'correcthorsebatterystaple',
-#                                                       dbname = 'mydb')
-#                                 
-#                                 # This returns the current rowcount of the mysqltable 
-#                                 rowcount <- dbGetQuery(con, "SHOW TABLE STATUS;") %>% filter(Name == "mysqltable") %>% pull(Rows)
-#                               },
-#                               valueFunc = function() {
-#                                 test_db <- dbReadTable(con, "mysqltable")
-#                               })
-#   
-#   output$mytable  <- DT::renderDT({ 
-#     test_db <- QueriedData() %>% as.data.frame()
-#     DT::datatable(test_db)
-#   })
-# }
+  #  output$text1 <- renderText({ 
+  #    paste("The chart is showing fiscal stimulus and real economy growthYou have selected ", input$radio)
+  #  })
+  
+  # output$lineChart <- renderPlot({
+  #   chartData <- switch(input$radio,
+  #                       "World" = list(dat$gr_w,dat$re_w),
+  #                       "All countries except China" = list(dat$gr_noChina,dat$re_noChina),
+  #                       "Advanced Economies only" = list(dat$gr_advanced,dat$re_advanced),
+  #                       "Eurozone" = list(dat$gr_euro,dat$re_euro) 
+  #   )  
+  #   
+  #   chartTitle <- switch(input$radio,
+  #                        "World" = "the world",
+  #                        "All countries except China" = "all countries except China",
+  #                        "Advanced Economies only" = "the advanced economies",
+  #                        "Eurozone" = "the euro area" 
+  #   )
+  #   
+  #   yrange <- c(-4,12)
+  #   xrange <- range(year)
+  #   plot(xrange,yrange,type="n",xlab="",ylab="Growth rate (percent)",cex.lab=1.5,
+  #        main=paste("GDP-weighted averages shown for", chartTitle),
+  #        sub=c("Data: IMF WEO (10/2015). Chart J. Zilinsky \n Note: Data for 2016 are IMF projections"))
+  #   lines(year,chartData[[1]],col="aquamarine4",lwd=3)
+  #   lines(year[2:12],na.omit(chartData[[2]]),col="firebrick3",lwd=3)
+  #   abline(v=input$vertical,lty=2) 
+  #   legend(2012,8,c("Real government spending","Real GDP"), 
+  #          col=c('firebrick3','aquamarine4'),pch=15,ncol=1,bty ="n",cex=1.1)
+  #   
+  #   if (input$hor) {
+  #     abline(h=0)  
+  #   } 
+  # },height = 500, width = 600)
   
 ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
   
