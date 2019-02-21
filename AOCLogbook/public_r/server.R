@@ -98,15 +98,18 @@ server <- function(input, output, session) {
   
   # Incident Report Query #
   observeEvent(input$incidentSubmit,{
+    print(input$midName)
     
-    if((input$file == "") == FALSE){file1 <- (input$file)} else{file1 <- (paste0(""))}
+    if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
+    if((input$midName == "") == FALSE){middleName <- midName} else{middleName <- (paste0(""))}
+    if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste(input$file)}
     
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
     
     query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`)
-    VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", input$firstName, input$midName, input$lastName, input$roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, file1)
+    VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", input$firstName, middleName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload)
 
     dbGetQuery(db, query)
     reset("incidentForm")

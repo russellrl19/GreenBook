@@ -7,9 +7,9 @@ library(RMySQL)
 library(dbConnect)
 library(DBI)
 library(gWidgets)
-# library(dplyr)   # Get to work in putty
-# library(dbplyr)  # Get to work in putty
-# library(pool)    # Get to work in putty
+library(dplyr)   # Get to work in putty
+library(dbplyr)  # Get to work in putty
+library(pool)    # Get to work in putty
 library(shinyjs)
 library(shinyalert)
 
@@ -17,9 +17,6 @@ ui <- dashboardPage(
     skin = "green",
     dashboardHeader(title = "VMI Green Book"),
     dashboardSidebar(
-      # Custom CSS to hide the default logout panel
-      tags$head(tags$style(HTML('.shiny-server-account { display: none; }'))),
-      # The dynamically-generated user panel
       uiOutput("userpanel"),
       sidebarMenu(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
@@ -82,10 +79,10 @@ ui <- dashboardPage(
               column(width = 6,
                 box(
                   title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
-                  textInput("firstName", "First Name:", width = NULL, placeholder = "First Name", value = NULL),
+                  textInput("firstName", "First Name:", width = NULL, placeholder = "First Name"),
                   textInput("midName", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
-                  textInput("lastName", "Last Name:", width = NULL, placeholder = "Last Name", value = NULL),
-                  numericInput("roomNum", "Room Number:", value = '109', width = NULL, min = 100, max = 3440 )
+                  textInput("lastName", "Last Name:", width = NULL, placeholder = "Last Name"),
+                  numericInput("roomNum", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
                 ),
                 box(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
@@ -102,10 +99,8 @@ ui <- dashboardPage(
                       "Other" = "other"
                     )
                   ),
-                  textAreaInput(
-                    "narrative", "Narrative:", width = NULL, height = '170px'
-                  ),
-                  fileInput("file", "Attach Picture(s)", multiple = TRUE)
+                  textAreaInput("narrative", "Narrative:", width = NULL, height = '170px'),
+                  fileInput("file", "Attach Picture", width = NULL)
                 ),
                 actionButton("incidentReset", "Clear", class="btn-lg"),
                 useShinyalert(),
