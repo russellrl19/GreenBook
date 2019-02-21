@@ -12,6 +12,7 @@ library(dbplyr)  # Get to work in putty
 library(pool)    # Get to work in putty
 library(shinyjs)
 library(shinyalert)
+library(plotly)
 
 ui <- dashboardPage(
     skin = "green",
@@ -57,16 +58,21 @@ ui <- dashboardPage(
         ),
         ## DATA ANALYSIS ##
         tabItem(tabName = "dataAnalysis",
-          h2("Data Analysis"),
-          box(
-            title = "Histogram", status = "primary", solidHeader = TRUE, collapsible = TRUE,
-            plotOutput("plot3", height = 250)
+          h2("Data Analysis"), br(), br(),
+          box(title = "Choose trend:", status = "warning", solidHeader = TRUE, width = 3,
+            selectInput("trendType", "Trend:", 
+                        c("Choose one" = "",
+                          "Alcohol" = "alc",
+                          "Medical" = "emt",
+                          "Emergency" = "emg",
+                          "Other" = "other"
+                        )
+            ),
+            dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
+            dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px')
           ),
-          box(
-            title = "Inputs", status = "warning", solidHeader = TRUE,
-            "Box content here", br(), "More box content",
-            sliderInput("slider", "Slider input:", 1, 100, 50),
-            textInput("text", "Text input:")
+          box(title = "Trends!", status = "primary", solidHeader = TRUE, width = NULL,
+            plotOutput("trendPlot")
           )
         ),
         ## INCIDENT REPORT ##

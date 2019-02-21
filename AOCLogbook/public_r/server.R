@@ -90,6 +90,45 @@ server <- function(input, output, session) {
       dbDisconnect(db)
   })
   
+## ANALYTICS TAB ##
+  db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
+                  port = options()$mysql$port, user = options()$mysql$user,
+                  password = options()$mysql$password)
+  trendQuery <- paste0("SELECT * FROM greenbook.incident_report
+        WHERE (incident_date BETWEEN '", input$fromTrendDate, "' AND '", input$toTrendDate, "') 
+        AND (incident_type = '", input$trendType, "');")
+  trendData <- dbGetQuery(db, trendQuery)
+  
+  output$trendPlot <- renderPlot({
+    plot(trendData)
+  })
+  
+#   # Run every 30 seconds
+#   QueriedData <- reactivePoll(30000,session, 
+#                               
+#                               #A function whose values over time will be tested for equality; inequality indicates that the underlying value has changed and needs to be invalidated and re-read using valueFunc
+#                               checkFunc = function(){ 
+#                                 
+#                                 # connect
+#                                 con <- DBI::dbConnect(RMariaDB::MariaDB(), 
+#                                                       #RMySQL::MySQL(),
+#                                                       host = '192.168.0.0',
+#                                                       user = 'xkcd',
+#                                                       password = 'correcthorsebatterystaple',
+#                                                       dbname = 'mydb')
+#                                 
+#                                 # This returns the current rowcount of the mysqltable 
+#                                 rowcount <- dbGetQuery(con, "SHOW TABLE STATUS;") %>% filter(Name == "mysqltable") %>% pull(Rows)
+#                               },
+#                               valueFunc = function() {
+#                                 test_db <- dbReadTable(con, "mysqltable")
+#                               })
+#   
+#   output$mytable  <- DT::renderDT({ 
+#     test_db <- QueriedData() %>% as.data.frame()
+#     DT::datatable(test_db)
+#   })
+# }
   
 ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
   
