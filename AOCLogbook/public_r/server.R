@@ -101,61 +101,25 @@ server <- function(input, output, session) {
   trendData <- dbGetQuery(db, trendQuery)
   dbDisconnect(db)
   output$trendPlot <- renderPlot({
-    # plot(trendData$incident_date, 
-    #      trendData$incident_time, 
-    #      xlim = (c("2019-01-01", "2019-02-21")), 
-    #      ylim = (c(00, 24)),
-    #      xlab = "Date",
-    #      ylab = "Time"
+    # rdate <- as.Date(trendData$incident_date, "%Y-%m-%d")
+    # plot(
+    #   rdate, a$Freq,
     # )
-    plot(trendData$incident_date, trendData$incident_time,
-         ylim=c(as.POSIXct('00:00:00', format="%H:%M:%S"),
-                as.POSIXct('24:00:00', format="%H:%M:%S")),
-         # xlim=c(as.POSIXct('2019-01-01', format="%Y-%m-%d"),
-         #        as.POSIXct('2019-02-22', format="%Y-%m-%d")),
-         xlim=c(max(trendData$incident_date),min(trendData$incident_date)),
-         # xlim=as.Date(c('2019-02-00', '2019-02-22')),
-         xlab="Date of incident",
-         ylab="Time of incident"
+    a <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
+    df <- data.frame(
+      Date = as.Date(a$Var1, "%Y-%m-%d"),
+      Frequency = a$Freq
     )
-    #xlim=as.Date(c("2014-06-09", "2014-08-30"))
+    base <- ggplot(df, aes(Date, Frequency, group = 0)) + geom_line() + expand_limits(y=0)
+    base
+    # plot(
+    #   a,
+    #   type="b",
+    #   xlab="Date",
+    #   ylab="Number of Incidents"
+    # )
   })
 })
-  
-  #  output$text1 <- renderText({ 
-  #    paste("The chart is showing fiscal stimulus and real economy growthYou have selected ", input$radio)
-  #  })
-  
-  # output$lineChart <- renderPlot({
-  #   chartData <- switch(input$radio,
-  #                       "World" = list(dat$gr_w,dat$re_w),
-  #                       "All countries except China" = list(dat$gr_noChina,dat$re_noChina),
-  #                       "Advanced Economies only" = list(dat$gr_advanced,dat$re_advanced),
-  #                       "Eurozone" = list(dat$gr_euro,dat$re_euro) 
-  #   )  
-  #   
-  #   chartTitle <- switch(input$radio,
-  #                        "World" = "the world",
-  #                        "All countries except China" = "all countries except China",
-  #                        "Advanced Economies only" = "the advanced economies",
-  #                        "Eurozone" = "the euro area" 
-  #   )
-  #   
-  #   yrange <- c(-4,12)
-  #   xrange <- range(year)
-  #   plot(xrange,yrange,type="n",xlab="",ylab="Growth rate (percent)",cex.lab=1.5,
-  #        main=paste("GDP-weighted averages shown for", chartTitle),
-  #        sub=c("Data: IMF WEO (10/2015). Chart J. Zilinsky \n Note: Data for 2016 are IMF projections"))
-  #   lines(year,chartData[[1]],col="aquamarine4",lwd=3)
-  #   lines(year[2:12],na.omit(chartData[[2]]),col="firebrick3",lwd=3)
-  #   abline(v=input$vertical,lty=2) 
-  #   legend(2012,8,c("Real government spending","Real GDP"), 
-  #          col=c('firebrick3','aquamarine4'),pch=15,ncol=1,bty ="n",cex=1.1)
-  #   
-  #   if (input$hor) {
-  #     abline(h=0)  
-  #   } 
-  # },height = 500, width = 600)
   
 ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
   

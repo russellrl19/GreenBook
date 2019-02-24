@@ -13,6 +13,10 @@ library(pool)    # Get to work in putty
 library(shinyjs)
 library(shinyalert)
 library(plotly)
+library(ggplot2)
+library(scales)
+library(grid)
+library(RColorBrewer)
 
 ui <- dashboardPage(
     skin = "green",
@@ -72,7 +76,7 @@ ui <- dashboardPage(
             dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
             actionButton("trendSubmit", "Submit", class="btn-lg")
           ),
-          box(title = "Trends!", status = "primary", solidHeader = TRUE,
+          box(title = "Trends!", status = "primary", solidHeader = TRUE, height = 500,#850,
             plotOutput("trendPlot")
           )
         ),
