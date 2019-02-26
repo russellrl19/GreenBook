@@ -128,10 +128,10 @@ ui <- dashboardPage(
             fluidRow(
               column(width = 1),
               column(width = 6,
-                box(
-                  title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
-                  textInput("dailyOfficer", "Officer Name:", width = NULL, placeholder = "Last Name")
-                ),
+                # box(
+                #   title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
+                #   textInput("dailyOfficer", "Officer Name:", width = NULL, placeholder = "Last Name")
+                # ),
                 box(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
                   dateInput("dailyDate", "Date of event:", format = "mm-dd-yyyy", width = NULL, value = Sys.Date()),
