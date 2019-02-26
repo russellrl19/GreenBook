@@ -160,6 +160,32 @@ server <- function(input, output, session) {
     output$table <- renderTable(data)
   })
   
+  output$tracks <- renderUI({
+    num_tracks <- as.integer(input$in_num_tracks)
+
+    # create date intervals
+    dseq <- seq(as.Date(input$in_duration_date_start),as.Date(input$in_duration_date_end),by=1)
+    r1 <- unique(as.character(cut(dseq,breaks=num_tracks+1)))
+
+    lapply(1:num_tracks, function(i) {
+
+      div(class="row",
+          div(class="col-xs-3",style=list("padding-right: 3px;"),
+              textInput(paste0("in_track_name_",i),label="Name",value=paste0("Text",i),placeholder="Available")
+          ),
+          div(class="col-xs-3",style=list("padding-right: 3px; padding-left: 3px;"),
+              dateInput(paste0("in_track_date_start_",i),label="From",value=as.Date(r1[i],"%Y-%m-%d"))
+          ),
+          div(class="col-xs-3",style=list("padding-right: 3px; padding-left: 3px;"),
+              dateInput(paste0("in_track_date_end_",i),label="To",value=as.Date(r1[i+1],"%Y-%m-%d")-1)
+          ),
+          div(class="col-xs-3",style=list("padding-left: 3px;"),
+              colourpicker::colourInput(paste0("in_track_colour_",i),label="Colour",
+                                        palette="limited",allowedCols=cols,value=cols[i])
+          )
+      )
+    })
+  })
   
 ## CLEAR FORM BUTTONS ##
   observeEvent(input$incidentReset, {

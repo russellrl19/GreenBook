@@ -23,7 +23,8 @@ ui <- dashboardPage(
         menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),
         menuItem("Incident Report", tabName = "incidentReport", icon = icon("book")),
         menuItem("Daily Report", tabName = "dailyReport", icon = icon("globe")),
-        menuItem("Search Reports", tabName = "searchReports", icon = icon("search"))
+        menuItem("Search Reports", tabName = "searchReports", icon = icon("search")),
+        menuItem("Calendar", tabName = "calendar", icon = icon("calendar"))
       )
     ),
     dashboardBody(
@@ -196,8 +197,21 @@ ui <- dashboardPage(
               )
             )
           )
+        ),
+        
+        ##  CALENDAR ##
+        tabItem(tabName = "calender",
+                h2("Calender"), useShinyjs(),
+                div(class="row",
+                    div(class="col-md-6",
+                        dateInput("in_duration_date_start","From",value=format(as.Date(Sys.time(),"%Y-%m-%d",tz="Europe/Stockholm"),"%Y-%m-%d"))
+                    ),
+                    div(class="col-md-6",
+                        dateInput("in_duration_date_end","To",value=format(as.Date(Sys.time(),"%Y-%m-%d",tz="Europe/Stockholm")+30,"%Y-%m-%d"))
+                    )
+                )
+          )
         )
-      )
       )
     )
   )
