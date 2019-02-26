@@ -18,17 +18,20 @@ server <- function(input, output, session) {
     "user" = "root",
     "password" = "root"
   ))
+  
+  userName <- ""
+  userStatus <- ""
 
 ## LOGIN SETUP ##
   shinyjs::hide("userForm")
   loggedIn <- FALSE
   observeEvent(input$submitLogin,{
     databaseName <- "greenbook"
-    table <- "user_data"
+    table <- "user"
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
-    query <- sprintf(paste0("SELECT user_id FROM greenbook.user_data
+    query <- sprintf(paste0("SELECT * FROM greenbook.user
       WHERE user_username = '", input$username, "' AND user_password = '", input$password, "';"), table, paste(names(data), collapse = ", "))
     data <- dbGetQuery(db, query)
     dbDisconnect(db)
@@ -40,13 +43,15 @@ server <- function(input, output, session) {
       shinyjs::hide(id = "loginForm")
       loggedIn <- TRUE
       loggedInUsername <- input$username
-      loggedInUserID <- data$user_id
+      userName = loggedInUsername
+      print(userName)
+      userStatus <- data$user_permission
 
       output$userpanel <- renderUI({
         if(loggedIn == TRUE){
           sidebarUserPanel(
             span("Logged in as ", loggedInUsername),
-            subtitle = a(icon("sign-out"), "Logout", href="__logout__")
+            subtitle = a(icon("sign-out"), "Logout", href="")
           )
         }
       })
@@ -73,6 +78,10 @@ server <- function(input, output, session) {
           "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
           OR daily_date = '", Sys.Date(), "'"),
           "daily_report")
+        query3 <- sprintf(paste0(
+          "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+          OR daily_date = '", Sys.Date(), "'"),
+          "daily_report")
       }
       # Querey's for TAC if the current time is AFTER 1700 #
       else{
@@ -82,11 +91,16 @@ server <- function(input, output, session) {
         query2 <- sprintf(paste0(
           "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
           "daily_report")
+        query3 <- sprintf(paste0(
+          "SELECT daily_event_type, daily_date, daily_time FROM greenbook.daily_report WHERE daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
+          "daily_report")
       }
       incidentData <- dbGetQuery(db, query1)
       output$dahboardIncident <- renderTable(incidentData)
       dailyData <- dbGetQuery(db, query2)
       output$dahboardDaily <- renderTable(dailyData)
+      cadetData <- dbGetQuery(db, query3)
+      output$dahboardCadet <- renderTable(cadetData)
       dbDisconnect(db)
   })
   
@@ -101,23 +115,21 @@ server <- function(input, output, session) {
   trendData <- dbGetQuery(db, trendQuery)
   dbDisconnect(db)
   output$trendPlot <- renderPlot({
-    # rdate <- as.Date(trendData$incident_date, "%Y-%m-%d")
-    # plot(
-    #   rdate, a$Freq,
-    # )
     a <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
+    names(a) <- c("Date", "Freq")
     df <- data.frame(
-      Date = as.Date(a$Var1, "%Y-%m-%d"),
+      Date = as.Date(a$Date, "%Y-%m-%d"),
       Frequency = a$Freq
     )
-    base <- ggplot(df, aes(Date, Frequency, group = 0)) + geom_line() + expand_limits(y=0)
-    base
-    # plot(
-    #   a,
-    #   type="b",
-    #   xlab="Date",
-    #   ylab="Number of Incidents"
-    # )
+    ggplot(df, aes(x=Date, y=Frequency)) + 
+      geom_bar(stat = "identity") + theme_bw() + 
+      labs(x = "Date", y = "Frequency") + 
+      scale_x_date(labels = date_format("%m-%d-%Y")) +
+      theme(axis.text.x = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"),
+            axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),  
+            axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
+            axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
+    #ggplot(df, aes(Date, Frequency, group = 0)) + geom_line() + expand_limits(y=0)
   })
 })
   
@@ -131,8 +143,8 @@ server <- function(input, output, session) {
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                     port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
-    query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`)
-        VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", input$firstName, middleName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload)
+    query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `user_username`)
+        VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", input$firstName, middleName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, userName)
     dbGetQuery(db, query)
     reset("incidentForm")
     dbDisconnect(db)

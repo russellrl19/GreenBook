@@ -41,29 +41,29 @@ ui <- dashboardPage(
         ## DASHBOARD ##
         tabItem(tabName = "dashboard",
           h2("Dashboard"),
-          h2("Recent TAC Data"),
           fluidRow(
+            column(width = 1),
+            column(width = 6,
+            h2("Recent TAC Data"),
             box(
-              title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = 6,
+              title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = NULL,
               column(12, tableOutput('dahboardIncident'))
             ),
             box(
-              title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 6,
+              title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
               column(12, tableOutput('dahboardDaily'))
-            )
-          ),
-          br(), h2("Recent Cadet Data"),
-          fluidRow(
+            ),
+            br(), br(), h2("Recent Cadet Data"),
             box(
-              title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = 6,
+              title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
               column(12, tableOutput('dahboardCadet'))
-            )
+            ))
           )
         ),
         ## DATA ANALYSIS ##
         tabItem(tabName = "dataAnalysis",
           h2("Data Analysis"), br(), br(),
-          box(title = "Choose trend:", status = "warning", solidHeader = TRUE, width = 3,
+          box(title = "Choose trend:", status = "warning", solidHeader = TRUE, width = 4,
             selectInput("trendType", "Trend:", 
                         c("Choose one" = "",
                           "Alcohol" = "alc",
@@ -76,7 +76,7 @@ ui <- dashboardPage(
             dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
             actionButton("trendSubmit", "Submit", class="btn-lg")
           ),
-          box(title = "Trends!", status = "primary", solidHeader = TRUE, height = 500,#850,
+          box(title = "Trends!", status = "primary", solidHeader = TRUE,
             plotOutput("trendPlot")
           )
         ),
