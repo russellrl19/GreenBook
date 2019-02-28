@@ -7,9 +7,6 @@ library(RMySQL)
 library(dbConnect)
 library(DBI)
 library(gWidgets)
-library(dplyr)   # Get to work in putty
-library(dbplyr)  # Get to work in putty
-library(pool)    # Get to work in putty
 library(shinyjs)
 library(shinyalert)
 library(plotly)
@@ -17,8 +14,10 @@ library(ggplot2)
 library(scales)
 library(grid)
 library(RColorBrewer)
+library(shinyBS)
 
 ui <- dashboardPage(
+  
     skin = "green",
     dashboardHeader(title = "VMI Green Book"),
     dashboardSidebar(
@@ -66,10 +65,38 @@ ui <- dashboardPage(
           box(title = "Choose trend:", status = "warning", solidHeader = TRUE, width = 4,
             selectInput("trendType", "Trend:", 
                         c("Choose one" = "",
-                          "Alcohol" = "alc",
-                          "Medical" = "emt",
-                          "Emergency" = "emg",
-                          "Other" = "other"
+                          "Absence Barracks/Post",
+                          "Weapons",
+                          "Assault",
+                          "Conduct",
+                          "Civilian Clothing",
+                          "Vandalizing",
+                          "Disturbance/Dispute",
+                          "Alcohol",
+                          "Unauthorized Ratline Activity",
+                          "Improper Dress (C)",
+                          "Loss/Misuse Institute Property (C)",
+                          "Evading OC/Guard (C)",
+                          "Neglect of Duty - Guard",
+                          "Neglect of Duty - General",
+                          "Visiting Unauthorized - Off Post",
+                          "Visiting Unauthorized - On Post",
+                          "Visiting Unauthorized - In Barracks",
+                          "Visitors Unauthorized",
+                          "Fire",
+                          "EMT/Rescue",
+                          "Police Emergency",
+                          "Police Arrest",
+                          "Police Barracks",
+                          "Police Post",
+                          "Emergency General",
+                          "Physical Plant",
+                          "Title IX",
+                          "Suicide Attempt",
+                          "Suicide Thoughts",
+                          "Sick/Injured",
+                          "Room/Stoop",
+                          "Other"
                         )
             ),
             dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
@@ -78,6 +105,7 @@ ui <- dashboardPage(
           ),
           box(title = "Trends!", status = "primary", solidHeader = TRUE,
             plotOutput("trendPlot")
+            #tableOutput("trendTable")
           )
         ),
         ## INCIDENT REPORT ##
@@ -90,28 +118,56 @@ ui <- dashboardPage(
               column(width = 6,
                 box(
                   title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
-                  textInput("firstName", "First Name:", width = NULL, placeholder = "First Name"),
+                  textInput("firstName", "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
                   textInput("midName", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
-                  textInput("lastName", "Last Name:", width = NULL, placeholder = "Last Name"),
+                  textInput("lastName", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
                   numericInput("roomNum", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
                 ),
                 box(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
-                  dateInput("date", "Date of event:", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),
+                  dateInput("date", "Date of event: (REQUIRED)", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),
                   timeInput("time", "Time of event:", seconds = FALSE,  value = Sys.time())
                 ),
                 box(
                   title = "What", status = "primary", solidHeader = TRUE, width = NULL,
-                  selectInput("eventTag", "Event Type:", 
+                  selectInput("eventTag", "Event Type: (REQUIRED)", 
                     c("Choose one" = "",
-                      "Alcohol offense" = "alc",
-                      "Medical" = "emt",
-                      "Emergency" = "emg",
-                      "Other" = "other"
+                      "Absence Barracks/Post",
+                      "Weapons",
+                      "Assault",
+                      "Conduct",
+                      "Civilian Clothing",
+                      "Vandalizing",
+                      "Disturbance/Dispute",
+                      "Alcohol",
+                      "Unauthorized Ratline Activity",
+                      "Improper Dress (C)",
+                      "Loss/Misuse Institute Property (C)",
+                      "Evading OC/Guard (C)",
+                      "Neglect of Duty - Guard",
+                      "Neglect of Duty - General",
+                      "Visiting Unauthorized - Off Post",
+                      "Visiting Unauthorized - On Post",
+                      "Visiting Unauthorized - In Barracks",
+                      "Visitors Unauthorized",
+                      "Fire",
+                      "EMT/Rescue",
+                      "Police Emergency",
+                      "Police Arrest",
+                      "Police Barracks",
+                      "Police Post",
+                      "Emergency General",
+                      "Physical Plant",
+                      "Title IX",
+                      "Suicide Attempt",
+                      "Suicide Thoughts",
+                      "Sick/Injured",
+                      "Room/Stoop",
+                      "Other"
                     )
                   ),
                   textAreaInput("narrative", "Narrative:", width = NULL, height = '170px'),
-                  fileInput("file", "Attach Picture", width = NULL)
+                  fileInput("file", "Attach Picture:", width = NULL)
                 ),
                 actionButton("incidentReset", "Clear", class="btn-lg"),
                 useShinyalert(),
@@ -128,19 +184,15 @@ ui <- dashboardPage(
             fluidRow(
               column(width = 1),
               column(width = 6,
-                # box(
-                #   title = "Who", status = "primary", solidHeader = TRUE, width = NULL,
-                #   textInput("dailyOfficer", "Officer Name:", width = NULL, placeholder = "Last Name")
-                # ),
                 box(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
-                  dateInput("dailyDate", "Date of event:", format = "mm-dd-yyyy", width = NULL, value = Sys.Date()),
+                  dateInput("dailyDate", "Date of event: (REQUIRED)", format = "mm-dd-yyyy", width = NULL, value = Sys.Date()),
                   timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
                 ),
                 box(
                   title = "What", status = "primary", solidHeader = TRUE, width = NULL,
-                  selectInput("dailyEventTag", "Event Type:", 
-                    c("Choose one",
+                  selectInput("dailyEventTag", "Event Type: (REQUIRED)", 
+                    c("Choose one" = "",
                       "Example 1" = "exm1",
                       "Example 2" = "exm2",
                       "Example 3" = "exm3",
@@ -168,24 +220,52 @@ ui <- dashboardPage(
               column(width = 6,
                 box(
                   title = "Who", status = "primary", solidHeader = TRUE, width = '250px',
-                  textInput("searchFirstName", "First Name:", width = '400px', placeholder = "First Name"),
-                  textInput("searchMidName", "Middle Initial:", width = '400px', placeholder = "Middle Initial"),
-                  textInput("searchLastName", "Last Name:", width = '400px', placeholder = "Last Name"),
-                  numericInput("searchRoomNum", "Room Number:", value = NULL, width = '400px', max = 3440 )
+                  textInput("searchFirstName", "First Name:", width = NULL, placeholder = "First Name"),
+                  textInput("searchMidName", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+                  textInput("searchLastName", "Last Name:", width = NULL, placeholder = "Last Name"),
+                  numericInput("searchRoomNum", "Room Number:", value = NULL, width = NULL, max = 3440 )
                 ),
                 box(
-                  title = "When", status = "primary", solidHeader = TRUE, width = '250px',
-                  dateInput("fromSearchDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
-                  dateInput("toSearchDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px')
+                  title = "When", status = "primary", solidHeader = TRUE, width = NULL,
+                  dateInput("fromSearchDate", "From:", format = "mm-dd-yyyy", value = Sys.Date() - 1, width = NULL),
+                  dateInput("toSearchDate", "To:", format = "mm-dd-yyyy", value = NULL, width = NULL)
                 ),
                 box(
-                  title = "What", status = "primary", solidHeader = TRUE, width = '250px',
+                  title = "What", status = "primary", solidHeader = TRUE, width = NULL,
                   selectInput("searchEventTag", "Event Type:", 
                     c("Choose one" = "",
-                      "Alcohol offense" = "alc",
-                      "Medical" = "emt",
-                      "Emergency" = "emg",
-                      "Other" = "other"
+                      "Absence Barracks/Post",
+                      "Weapons",
+                      "Assault",
+                      "Conduct",
+                      "Civilian Clothing",
+                      "Vandalizing",
+                      "Disturbance/Dispute",
+                      "Alcohol",
+                      "Unauthorized Ratline Activity",
+                      "Improper Dress (C)",
+                      "Loss/Misuse Institute Property (C)",
+                      "Evading OC/Guard (C)",
+                      "Neglect of Duty - Guard",
+                      "Neglect of Duty - General",
+                      "Visiting Unauthorized - Off Post",
+                      "Visiting Unauthorized - On Post",
+                      "Visiting Unauthorized - In Barracks",
+                      "Visitors Unauthorized",
+                      "Fire",
+                      "EMT/Rescue",
+                      "Police Emergency",
+                      "Police Arrest",
+                      "Police Barracks",
+                      "Police Post",
+                      "Emergency General",
+                      "Physical Plant",
+                      "Title IX",
+                      "Suicide Attempt",
+                      "Suicide Thoughts",
+                      "Sick/Injured",
+                      "Room/Stoop",
+                      "Other"
                     )
                   )
                 ),
@@ -198,10 +278,11 @@ ui <- dashboardPage(
               column(width = 1),
               column(width = 12,
                 div(id = "searchResults",
-                  box(
-                    title = "Search", status = "primary", solidHeader = TRUE, width = '250px',
-                    column(12, tableOutput('table'))
-                  )
+                    bsModal("Search", "Search Results", "searchButton", size = "large", tableOutput('table'))
+                  # box(
+                  #   title = "Search", status = "primary", solidHeader = TRUE, width = '250px',
+                  #   column(12, tableOutput('table'))
+                  # )
                 ),
                 br(), br()
               )

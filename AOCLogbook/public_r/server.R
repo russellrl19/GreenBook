@@ -70,11 +70,11 @@ server <- function(input, output, session) {
               OR incident_date = '", Sys.Date(), "'"),
               "incident_report")
             query2 <- sprintf(paste0(
-              "SELECT * FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+              "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
               OR daily_date = '", Sys.Date(), "'"),
               "daily_report")
             query3 <- sprintf(paste0(
-              "SELECT * FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+              "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
               OR daily_date = '", Sys.Date(), "'"),
               "daily_report")
           }
@@ -96,11 +96,11 @@ server <- function(input, output, session) {
           output$dahboardIncident <- renderTable(incidentData)
           
           dailyData <- as.data.frame(dbGetQuery(db, query2))
-          names(dailyData) <- c("Date", "Time", "Notes", "Event Type", "User")
+          names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardDaily <- renderTable(dailyData)
           
           cadetData <- as.data.frame(dbGetQuery(db, query3))
-          names(cadetData) <- c("Date", "Time", "Notes", "Event Type", "User")
+          names(cadetData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardCadet <- renderTable(cadetData)
           dbDisconnect(db)
       })
@@ -116,11 +116,11 @@ server <- function(input, output, session) {
       trendData <- dbGetQuery(db, trendQuery)
       dbDisconnect(db)
       output$trendPlot <- renderPlot({
-        a <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
-        names(a) <- c("Date", "Freq")
+        trend <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
+        names(trend) <- c("Date", "Freq")
         df <- data.frame(
-          Date = as.Date(a$Date, "%Y-%m-%d"),
-          Frequency = a$Freq
+          Date = as.Date(trend$Date, "%Y-%m-%d"),
+          Frequency = trend$Freq
         )
         ggplot(df, aes(x=Date, y=Frequency)) + 
           geom_bar(stat = "identity") + theme_bw() + 
@@ -132,40 +132,48 @@ server <- function(input, output, session) {
                 axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
         #ggplot(df, aes(Date, Frequency, group = 0)) + geom_line() + expand_limits(y=0)
       })
+      #output$trendTable <- renderTable(trendData)
     })
       
     ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
       
       # Incident Report Query #
       observeEvent(input$incidentSubmit,{
-        if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
-        if((input$midName == "") == FALSE){middleName <- input$midName} else{middleName <- (paste0(""))}
-        if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste(input$file)}
-        db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
-                        port = options()$mysql$port, user = options()$mysql$user,
-                        password = options()$mysql$password)
-        query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
-            VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
-            input$firstName, middleName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
-        dbGetQuery(db, query)
-        reset("incidentForm")
-        dbDisconnect(db)
-        shinyalert("Success!", "You have submitted your incident report.", type = "success")
+        if(input$firstName != "" && input$lastName != "" && input$eventTag != "" && (is.null(input$date) == FALSE)){
+          if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
+          if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste(input$file)}
+          db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
+                          port = options()$mysql$port, user = options()$mysql$user,
+                          password = options()$mysql$password)
+          query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
+              VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
+                           input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
+          dbGetQuery(db, query)
+          reset("incidentForm")
+          dbDisconnect(db)
+          shinyalert("Success!", "You have submitted your incident report.", type = "success")
+        } else{
+          shinyalert("Hold on!", "You have not filled all required fields: First Name, Last Name, Incident Type, and Date", type = "warning")
+        }
       })
     
       # Daily Report Query #
       observeEvent(input$dailyReportSubmit,{
-        table <- "daily_report"
-        db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
-                        port = options()$mysql$port, user = options()$mysql$user,
-                        password = options()$mysql$password)
-        query <- sprintf(
-          "INSERT INTO `greenbook`.`daily_report` (`daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`, `userName`) 
-          VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, input$dailyNarrative, loggedInUsername)
-        dbGetQuery(db, query)
-        dbDisconnect(db)
-        reset("dailyReportForm")
-        shinyalert("Success!", "You have submitted your daily report.", type = "success")
+        if((input$dailyEventTag != "" && is.na(input$dailyDate) == FALSE) == TRUE){
+          table <- "daily_report"
+          db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
+                          port = options()$mysql$port, user = options()$mysql$user,
+                          password = options()$mysql$password)
+          query <- sprintf(
+            "INSERT INTO `greenbook`.`daily_report` (`daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`, `userName`) 
+            VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, input$dailyNarrative, loggedInUsername)
+          dbGetQuery(db, query)
+          dbDisconnect(db)
+          reset("dailyReportForm")
+          shinyalert("Success!", "You have submitted your daily report.", type = "success")
+        } else{
+          shinyalert("Hold on!", "You have not filled all required fields: Date and Event Type", type = "warning")
+        }
       })
       
       # Searching Query #
@@ -179,10 +187,11 @@ server <- function(input, output, session) {
         db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                         port = options()$mysql$port, user = options()$mysql$user, 
                         password = options()$mysql$password)
-        query <- paste0("SELECT * FROM greenbook.incident_report
+        query <- paste0("SELECT `cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `officer` FROM greenbook.incident_report
             WHERE (incident_date BETWEEN '", input$fromSearchDate, "' AND '", input$toSearchDate, "')", a, b, c, d, e)
-        data <- dbGetQuery(db, query)
+        data <- as.data.frame(dbGetQuery(db, query))
         dbDisconnect(db)
+        names(data) <- c("First Name", "Middile Initial", "Last Name", "Room", "Time", "Date", "Event Type", "Narrative", "User")
         output$table <- renderTable(data)
       })
       
