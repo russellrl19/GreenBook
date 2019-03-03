@@ -73,6 +73,11 @@ server <- function(input, output, session) {
                           port = options()$mysql$port, user = options()$mysql$user, 
                           password = options()$mysql$password)
           # Querey's for TAC if the current time is BEFORE 1700 #
+          if(data$permission == 1){
+            cadet <- "="
+          } else{
+            cadet <- "!="
+          }
           if(substring(Sys.time(), 12) < '17:00:00'){
             query1 <- sprintf(paste0(
               "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
@@ -82,11 +87,6 @@ server <- function(input, output, session) {
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
               OR userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
               "daily_report")
-            if(data$permission == 1){
-              cadet <- "="
-            } else{
-              cadet <- "!="
-            }
             query3 <- sprintf(paste0(
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
               OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
@@ -101,7 +101,7 @@ server <- function(input, output, session) {
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
               "daily_report")
             query3 <- sprintf(paste0(
-              "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
+              "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ",cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
               "daily_report")
           }
           #incidentData <- dbGetQuery(db, query1)
