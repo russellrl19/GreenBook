@@ -22,6 +22,20 @@ ui <- dashboardPage(
     dashboardHeader(title = "VMI Green Book"),
     dashboardSidebar(
       uiOutput("userpanel"),
+      tags$head(tags$script(HTML("
+      Shiny.addCustomMessageHandler('manipulateMenuItem', function(message){
+        var aNodeList = document.getElementsByTagName('a');
+                                 
+        for (var i = 0; i < aNodeList.length; i++) {
+          if(aNodeList[i].getAttribute('data-value') == message.tabName) {
+            if(message.action == 'hide'){
+              aNodeList[i].setAttribute('style', 'display: none;');
+            } else {
+              aNodeList[i].setAttribute('style', 'display: block;');
+            };
+          };
+        }
+      });"))),
       sidebarMenu(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
         menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),

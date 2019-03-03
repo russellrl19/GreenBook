@@ -40,7 +40,6 @@ server <- function(input, output, session) {
       shinyjs::hide(id = "loginForm")
       loggedIn <- TRUE
       loggedInUsername <- input$username
-      # userStatus <- data$permission
 
       output$userpanel <- renderUI({
         if(loggedIn == TRUE){
@@ -50,8 +49,16 @@ server <- function(input, output, session) {
           )
         }
       })
-      #   }
-      # })
+      
+      if(data$permission == 1){
+        session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "searchReports"))
+        session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "incidentReport"))
+        session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "dataAnalysis"))
+      }else{
+        session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "show", tabName = "searchReports"))
+        session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "show", tabName = "incidentReport"))
+        session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "show", tabName = "dataAnalysis"))
+      }
       
     ## DASHBOARD UPDATES ##
       toListen <- reactive({
