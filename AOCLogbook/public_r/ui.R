@@ -54,7 +54,7 @@ ui <- dashboardPage(
         ## DASHBOARD ##
         tabItem(tabName = "dashboard",
           h2("Dashboard"),
-          fluidRow(
+          fluidRow(id ="tacBox",
             column(width = 1),
             column(width = 6,
             h2("Recent TAC Data"),
@@ -65,7 +65,10 @@ ui <- dashboardPage(
             box(
               title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
               column(12, tableOutput('dahboardDaily'))
-            ),
+            ))),
+          fluidRow(
+                   column(width = 1),
+                   column(width = 6,
             br(), br(), h2("Recent Cadet Data"),
             box(
               title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,

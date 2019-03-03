@@ -54,10 +54,12 @@ server <- function(input, output, session) {
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "searchReports"))
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "incidentReport"))
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "dataAnalysis"))
+        shinyjs::hide("tacBox")
       }else{
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "show", tabName = "searchReports"))
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "show", tabName = "incidentReport"))
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "show", tabName = "dataAnalysis"))
+        shinyjs::show("tacBox")
       }
       
     ## DASHBOARD UPDATES ##
@@ -78,11 +80,16 @@ server <- function(input, output, session) {
               "incident_report")
             query2 <- sprintf(paste0(
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
-              OR daily_date = '", Sys.Date(), "'"),
+              OR userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
               "daily_report")
+            if(data$permission == 1){
+              cadet <- "="
+            } else{
+              cadet <- "!="
+            }
             query3 <- sprintf(paste0(
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
-              OR daily_date = '", Sys.Date(), "'"),
+              OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
               "daily_report")
           }
           # Querey's for TAC if the current time is AFTER 1700 #
