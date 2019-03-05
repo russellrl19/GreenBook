@@ -190,6 +190,37 @@ server <- function(input, output, session) {
         }
       })
       
+      # Daily Report Distinguished Choices #
+      if(data$permission == 1){
+        insertUI(
+          selector = "#insertDailyType",
+          where = "afterEnd",
+          ui = box(
+            title = "What", status = "primary", solidHeader = TRUE, width = NULL,
+            selectInput("dailyEventTag", "Event Type: (REQUIRED)",
+                        c("Choose one" = "", "Cadet Things")
+            ),
+            textAreaInput(
+              "dailyNarrative", "Narrative:", width = NULL, height = '170px'
+            )
+          )
+        )
+      } else{
+        insertUI(
+          selector = "#insertDailyType",
+          where = "afterEnd",
+          ui = box(
+            title = "What", status = "primary", solidHeader = TRUE, width = NULL,
+            selectInput("dailyEventTag", "Event Type: (REQUIRED)",
+                        c("Choose one" = "", "Officer Things")
+            ),
+            textAreaInput(
+              "dailyNarrative", "Narrative:", width = NULL, height = '170px'
+            )
+          )
+        )
+      }
+      
       # Searching Query #
       observeEvent(input$searchButton, {
         if((input$searchFirstName == "") == FALSE){a <- (paste0(" AND (cadet_fname = '", input$searchFirstName, "')"))} else{a <- (paste0(""))}

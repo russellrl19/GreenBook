@@ -197,7 +197,7 @@ ui <- dashboardPage(
         ## DAILY REPORT ##
         tabItem(tabName = "dailyReport",
           h2("Daily Report"), useShinyjs(),
-          div(id = "dailyReportForm", 
+          div(id = "dailyReportForm",
             fluidRow(
               column(width = 1),
               column(width = 6,
@@ -205,21 +205,7 @@ ui <- dashboardPage(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
                   dateInput("dailyDate", "Date of event: (REQUIRED)", format = "mm-dd-yyyy", width = NULL, value = Sys.Date()),
                   timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
-                ),
-                box(
-                  title = "What", status = "primary", solidHeader = TRUE, width = NULL,
-                  selectInput("dailyEventTag", "Event Type: (REQUIRED)", 
-                    c("Choose one" = "",
-                      "Example 1" = "exm1",
-                      "Example 2" = "exm2",
-                      "Example 3" = "exm3",
-                      "Example 4" = "exm4"
-                    )
-                  ),
-                  textAreaInput(
-                  "dailyNarrative", "Narrative:", width = NULL, height = '170px'
-                  )
-                ),
+                ), p(id="insertDailyType"),
                 actionButton("dailyReportReset", "Clear", class="btn-lg"),
                 useShinyalert(),
                 actionButton("dailyReportSubmit", "Submit", class="btn-lg"),
