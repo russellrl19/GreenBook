@@ -63,11 +63,7 @@ server <- function(input, output, session) {
       }
       
     ## DASHBOARD UPDATES ##
-      toListen <- reactive({
-        list(input$submitLogin,input$incidentSubmit,input$dailyReportSubmit)
-      })
-      
-      observeEvent(toListen(), {
+      observeEvent(c(input$submitLogin, input$incidentSubmit, input$dailyReportSubmit), {
           databaseName <- "greenbook"
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                           port = options()$mysql$port, user = options()$mysql$user, 
