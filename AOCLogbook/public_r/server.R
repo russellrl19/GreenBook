@@ -151,6 +151,38 @@ server <- function(input, output, session) {
       
     ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
       
+      # Incident Report insert and remove cadets #
+      inserted <- list(c())
+      observeEvent(input$insertBtn, {
+        btn <- input$insertBtn
+        id <- paste0('keydet', length(inserted))
+        
+        insertUI(
+          selector = "#insertCadetBox",
+          #where = "afterEnd",
+          ui = tags$div(
+            box(
+              title = sprintf("Cadet %s", length(inserted)), status = "primary", solidHeader = TRUE, width = NULL,
+              textInput(sprintf("firstName%s", length(inserted)), "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
+              textInput(sprintf("midName%s", length(inserted)), "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+              textInput(sprintf("lastName%s", length(inserted)), "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
+              numericInput(sprintf("roomNum%s", length(inserted)), "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
+            ), id = id)
+        )
+        inserted <<- c(id, inserted)
+        print(inserted)
+      })
+      
+      observeEvent(input$removeBtn, {
+        removeUI(
+          selector = paste0('#', inserted)
+        )
+        if(length(inserted) > 1){
+          inserted <<- inserted[-1]
+        }
+        print(inserted)
+      })
+      
       # Incident Report Query #
       observeEvent(input$incidentSubmit,{
         if(input$firstName != "" && input$lastName != "" && input$eventTag != "" && (is.null(input$date) == FALSE)){
@@ -159,8 +191,31 @@ server <- function(input, output, session) {
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)
+          # str <- (length(inserted) - 1)
+          i = 1
+          while (!is.null(inserted)) {
+            temp1 <- paste0("firstName", i)
+            temp2 <- paste0("midName", i)
+            temp3 <- paste0("lastName", i)
+            temp4 <- paste0("roomNum", i)
+
+            fname <- input$temp1
+            mName <- input$temp2
+            lName <- input$temp3
+            roomNum <- input$temp4
+
+            if((is.null(roomNum))){roomNum = (paste(""))}
+
+            # roomNum <- input$paste0("roomNum", i)
+            query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
+                VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
+                             fname, mName, lName, roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
+            dbGetQuery(db, query)
+            i <<- i + 1
+          }
+          
           query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
-              VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
+                VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
                            input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
           dbGetQuery(db, query)
           reset("incidentForm")

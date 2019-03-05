@@ -139,7 +139,8 @@ ui <- dashboardPage(
                   textInput("midName", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
                   textInput("lastName", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
                   numericInput("roomNum", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
-                ),
+                ), actionButton("insertBtn", "Add cadet"), actionButton("removeBtn", "Remove cadet"), br(), br(), tags$div(id = 'insertCadetBox'),
+                br(),
                 box(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
                   dateInput("date", "Date of event: (REQUIRED)", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),

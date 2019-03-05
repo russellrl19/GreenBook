@@ -3,8 +3,8 @@ library(shiny)
 
   # Define UI
   ui <- fluidPage(
-    actionButton("add", "Add UI"),
-    actionButton("reset", "Remove UI")
+    actionButton("add", "Add cadet"),
+    actionButton("reset", "Remove cadet")
   )
   
   # Server logic
