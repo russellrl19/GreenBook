@@ -1,23 +1,23 @@
 ## server.R ##
 
 server <- function(input, output, session) {
-
+  
 ## DATABASE SETUP ##
   # FOR AWS #
-  # options(mysql = list(
-  #   "host" = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
-  #   "port" = 3306,
-  #   "user" = "greenbookadmin",
-  #   "password" = "~L7pPw}UZ;8*"
-  # ))
+  options(mysql = list(
+    "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
+    "port" = 3306,
+    "user" = "greenbookadmin",
+    "password" = "~L7pPw}UZ;8*"
+  ))
 
   # FOR LOCAL #
-  options(mysql = list(
-    "host" = "localhost",
-    "port" = 3306,
-    "user" = "root",
-    "password" = "root"
-  ))
+  # options(mysql = list(
+  #   "host" = "localhost",
+  #   "port" = 3306,
+  #   "user" = "root",
+  #   "password" = "root"
+  # ))
 
 ## LOGIN SETUP ##
   shinyjs::hide("userForm")
@@ -64,7 +64,6 @@ server <- function(input, output, session) {
       
     ## DASHBOARD UPDATES ##
       observeEvent(c(input$submitLogin, input$incidentSubmit, input$dailyReportSubmit), {
-          databaseName <- "greenbook"
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                           port = options()$mysql$port, user = options()$mysql$user, 
                           password = options()$mysql$password)
@@ -94,7 +93,6 @@ server <- function(input, output, session) {
               OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
                 "daily_report")
             }
-            
           }
           # Querey's for TAC if the current time is AFTER 1700 #
           else{
@@ -165,7 +163,7 @@ server <- function(input, output, session) {
       inserted <- list(c())
       observeEvent(input$insertBtn, {
         btn <- input$insertBtn
-        id <- paste0('keydet', length(inserted))
+        Id <- paste0('keydet', length(inserted))
         
         insertUI(
           selector = "#insertCadetBox",
@@ -177,17 +175,16 @@ server <- function(input, output, session) {
             #   textInput(sprintf("midName%s", length(inserted)), "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
             #   textInput(sprintf("lastName%s", length(inserted)), "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
             #   numericInput(sprintf("roomNum%s", length(inserted)), "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
-            # ), id = id)
+            # ), id = testId)
             box(
-              title = sprintf("Cadet %s", length(inserted)), status = "primary", solidHeader = TRUE, width = NULL,
+              title = sprintf("Cadet %s", length(inserted)), status = "warning", solidHeader = TRUE, width = NULL,
               textInput("firstName1", "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
               textInput("midName1", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
               textInput("lastName1", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
               numericInput("roomNum1", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
-            ), id = id)
+            ), Id = Id)
         )
-        inserted <<- c(id, inserted)
-        print(inserted)
+        inserted <<- c(Id, inserted)
       })
       
       observeEvent(input$removeBtn, {
@@ -197,7 +194,6 @@ server <- function(input, output, session) {
         if(length(inserted) > 1){
           inserted <<- inserted[-1]
         }
-        print(inserted)
       })
       
       # Incident Report Query #
@@ -210,18 +206,36 @@ server <- function(input, output, session) {
                           password = options()$mysql$password)
           str <- (length(inserted) - 1)
           if(str != 0){
-            for(i in 1:str){
-              fname <- input$firstName1
+            for(variablei in 1:str){
+              
+              fName <- input$firstName1   ## HARD CODED BUT WORKS FOR 1 CADET EXTRA
               mName <- input$midName1
               lName <- input$lastName1
               roomNum <- input$roomNum1
+              
+              # temp1 <- sprintf("firstName%s", variablei)
+              # fname <- noquote(paste0("input", "$", temp1))
+
+              # if((input$boxyBoi == paste0('keydet', variablei)) == TRUE){
+              #   fName <- input$firstName1
+              #   mName <- input$midName1
+              #   lName <- input$lastName1
+              #   roomNum <- input$roomNum1
+              # }
+
+              # if((input$firstName1 == temp) == TRUE){
+              #   fName <- input$firstName1
+              #   mName <- input$midName1
+              #   lName <- input$lastName1
+              #   roomNum <- input$roomNum1
+              # }
               
               if(is.null(roomNum) || is.na(roomNum)){roomNum = (paste(""))}
               
               # roomNum <- input$paste0("roomNum", i)
               query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
                 VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
-                               fname, mName, lName, roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
+                               fName, mName, lName, roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
               dbGetQuery(db, query)
             }
           }
