@@ -4,20 +4,20 @@ server <- function(input, output, session) {
   
 ## DATABASE SETUP ##
   # FOR AWS #
-  options(mysql = list(
-    "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
-    "port" = 3306,
-    "user" = "greenbookadmin",
-    "password" = "~L7pPw}UZ;8*"
-  ))
+  # options(mysql = list(
+  #   "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
+  #   "port" = 3306,
+  #   "user" = "greenbookadmin",
+  #   "password" = "~L7pPw}UZ;8*"
+  # ))
 
   # FOR LOCAL #
-  # options(mysql = list(
-  #   "host" = "localhost",
-  #   "port" = 3306,
-  #   "user" = "root",
-  #   "password" = "root"
-  # ))
+  options(mysql = list(
+    "host" = "localhost",
+    "port" = 3306,
+    "user" = "root",
+    "password" = "root"
+  ))
 
 ## LOGIN SETUP ##
   shinyjs::hide("userForm")
@@ -199,6 +199,7 @@ server <- function(input, output, session) {
       # Incident Report Query #
       observeEvent(input$incidentSubmit,{
         if(input$firstName != "" && input$lastName != "" && input$eventTag != "" && (is.null(input$date) == FALSE)){
+          narrativeString <- gsub("'","''",input$narrative)
           if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
           if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste(input$file)}
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
@@ -233,17 +234,17 @@ server <- function(input, output, session) {
               if(is.null(roomNum) || is.na(roomNum)){roomNum = (paste(""))}
               
               # roomNum <- input$paste0("roomNum", i)
-              query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
+              query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `image_path`, `officer`)
                 VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
-                               fName, mName, lName, roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
+                               fName, mName, lName, roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, narrativeString, fileUpload, loggedInUsername)
               dbGetQuery(db, query)
             }
           }
 
           
-          query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
+          query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `image_path`, `officer`)
                 VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
-                           input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
+                           input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, narrativeString, fileUpload, loggedInUsername)
           dbGetQuery(db, query)
           reset("incidentForm")
           dbDisconnect(db)
@@ -256,13 +257,14 @@ server <- function(input, output, session) {
       # Daily Report Query #
       observeEvent(input$dailyReportSubmit,{
         if((input$dailyEventTag != "" && is.na(input$dailyDate) == FALSE) == TRUE){
+          dailyNarrativeString <- gsub("'","''",input$dailyNarrative)
           table <- "daily_report"
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)
           query <- sprintf(
             "INSERT INTO `greenbook`.`daily_report` (`daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`, `userName`) 
-            VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, input$dailyNarrative, loggedInUsername)
+            VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, dailyNarrativeString, loggedInUsername)
           dbGetQuery(db, query)
           dbDisconnect(db)
           reset("dailyReportForm")
