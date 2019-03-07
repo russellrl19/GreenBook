@@ -52,7 +52,7 @@ ui <- dashboardPage(
       div(id = "loginForm",
       textInput("username", "Username:"),
       passwordInput("password", "Password:"),
-      actionButton("submitLogin", "Submit", icon("angle-double-right"))), 
+      actionButton("submitLogin", "Submit")), 
       div(id = "userForm",
       tabItems(
         ## DASHBOARD ##
