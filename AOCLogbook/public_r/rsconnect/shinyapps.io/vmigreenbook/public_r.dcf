@@ -5,9 +5,9 @@ account: vmigreenbook
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 769708
-bundleId: 1921030
+bundleId: 1921617
 url: https://vmigreenbook.shinyapps.io/public_r/
-when: 1551913514.82393
+when: 1551938809.51183
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: searching test.R|test app Add box with click/app.R|test app Change daily log choice/app.R|test app Loading GIF/app.R|test app Remove box with click/app.R|www/spider.png|www/styles.css

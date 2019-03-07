@@ -16,6 +16,8 @@ library(grid)
 library(RColorBrewer)
 library(shinyBS)
 
+Sys.setenv(TZ="America/New_York")
+
 ui <- dashboardPage(
     skin = "green",
     dashboardHeader(title = "VMI Green Book"),
@@ -44,10 +46,13 @@ ui <- dashboardPage(
       )
     ),
     dashboardBody(
+      tags$body(
+        tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+      ),
       div(id = "loginForm",
       textInput("username", "Username:"),
       passwordInput("password", "Password:"),
-      actionButton("submitLogin", "Submit")), 
+      actionButton("submitLogin", "Submit", icon("angle-double-right"))), 
       div(id = "userForm",
       tabItems(
         ## DASHBOARD ##
@@ -117,7 +122,7 @@ ui <- dashboardPage(
             ),
             dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
             dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
-            actionButton("trendSubmit", "Submit", class="btn-lg")
+            actionButton("trendSubmit", "Plot", icon("paper-plane"))
           ),
           box(title = "Trends!", status = "primary", solidHeader = TRUE,
             plotOutput("trendPlot")
@@ -207,7 +212,6 @@ ui <- dashboardPage(
                   timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
                 ), p(id="insertDailyType"),
                 actionButton("dailyReportReset", "Clear", class="btn-lg"),
-                useShinyalert(),
                 actionButton("dailyReportSubmit", "Submit", class="btn-lg"),
                 br(), br()
               )

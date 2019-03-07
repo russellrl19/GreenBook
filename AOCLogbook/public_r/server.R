@@ -328,7 +328,7 @@ server <- function(input, output, session) {
         reset("incidentForm")
       })
       
-      observeEvent(input$incidentReset, {
+      observeEvent(input$dailyReportReset, {
         reset("dailyReportForm")
       })
       
