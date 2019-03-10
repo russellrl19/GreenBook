@@ -299,7 +299,7 @@ ui <- dashboardPage(
           )
         )
     ),
-    tags$footer("Copyright 2019, GreenBook, Maddison Curran and Ryan Russell. All rights reserved.", style = "
+    tags$footer("Copyright 2019, GreenBook Inc. Maddison Curran and Ryan Russell. All rights reserved.", style = "
               position:absolute;
                     bottom:0;
                     height:50px;   /* Height of the footer */
