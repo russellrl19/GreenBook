@@ -16,8 +16,9 @@ library(grid)
 library(RColorBrewer)
 library(shinyBS)
 
+Sys.setenv(TZ="America/New_York")
+
 ui <- dashboardPage(
-  
     skin = "green",
     dashboardHeader(title = "VMI Green Book"),
     dashboardSidebar(
@@ -45,6 +46,9 @@ ui <- dashboardPage(
       )
     ),
     dashboardBody(
+      tags$body(
+        tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+      ),
       div(id = "loginForm",
       textInput("username", "Username:"),
       passwordInput("password", "Password:"),
@@ -116,9 +120,9 @@ ui <- dashboardPage(
                           "Other"
                         )
             ),
-            dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
-            dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = NULL, width = '400px'),
-            actionButton("trendSubmit", "Submit", class="btn-lg")
+            dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = Sys.Date() - 30, width = '400px'),
+            dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px'),
+            actionButton("trendSubmit", "Plot", icon("paper-plane"))
           ),
           box(title = "Trends!", status = "primary", solidHeader = TRUE,
             plotOutput("trendPlot")
@@ -139,7 +143,8 @@ ui <- dashboardPage(
                   textInput("midName", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
                   textInput("lastName", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
                   numericInput("roomNum", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
-                ),
+                ), actionButton("insertBtn", "Add cadet"), actionButton("removeBtn", "Remove cadet"), br(), br(), tags$div(id = 'insertCadetBox'),
+                #br(),
                 box(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
                   dateInput("date", "Date of event: (REQUIRED)", format = "mm-dd-yyyy", width = '400px', value = Sys.Date()),
@@ -197,7 +202,7 @@ ui <- dashboardPage(
         ## DAILY REPORT ##
         tabItem(tabName = "dailyReport",
           h2("Daily Report"), useShinyjs(),
-          div(id = "dailyReportForm", 
+          div(id = "dailyReportForm",
             fluidRow(
               column(width = 1),
               column(width = 6,
@@ -205,23 +210,8 @@ ui <- dashboardPage(
                   title = "When", status = "primary", solidHeader = TRUE, width = NULL,
                   dateInput("dailyDate", "Date of event: (REQUIRED)", format = "mm-dd-yyyy", width = NULL, value = Sys.Date()),
                   timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
-                ),
-                box(
-                  title = "What", status = "primary", solidHeader = TRUE, width = NULL,
-                  selectInput("dailyEventTag", "Event Type: (REQUIRED)", 
-                    c("Choose one" = "",
-                      "Example 1" = "exm1",
-                      "Example 2" = "exm2",
-                      "Example 3" = "exm3",
-                      "Example 4" = "exm4"
-                    )
-                  ),
-                  textAreaInput(
-                  "dailyNarrative", "Narrative:", width = NULL, height = '170px'
-                  )
-                ),
+                ), p(id="insertDailyType"),
                 actionButton("dailyReportReset", "Clear", class="btn-lg"),
-                useShinyalert(),
                 actionButton("dailyReportSubmit", "Submit", class="btn-lg"),
                 br(), br()
               )
@@ -307,6 +297,6 @@ ui <- dashboardPage(
           )
         )
       )
-      )
     )
   )
+)

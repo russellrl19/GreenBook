@@ -1,11 +1,11 @@
 ## server.R ##
 
 server <- function(input, output, session) {
-
+  
 ## DATABASE SETUP ##
   # FOR AWS #
   # options(mysql = list(
-  #   "host" = "vmigreenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
+  #   "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
   #   "port" = 3306,
   #   "user" = "greenbookadmin",
   #   "password" = "~L7pPw}UZ;8*"
@@ -62,13 +62,12 @@ server <- function(input, output, session) {
         shinyjs::show("tacBox")
       }
       
-    ## DASHBOARD UPDATES ##
+      ## DASHBOARD UPDATES ##
       toListen <- reactive({
-        list(input$submitLogin,input$incidentSubmit,input$dailyReportSubmit)
+        c(input$submitLogin,input$incidentSubmit,input$dailyReportSubmit)
       })
       
-      observeEvent(toListen(), {
-          databaseName <- "greenbook"
+      observeEvent(toListen(), delay(500, {
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                           port = options()$mysql$port, user = options()$mysql$user, 
                           password = options()$mysql$password)
@@ -87,10 +86,17 @@ server <- function(input, output, session) {
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
               OR userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
               "daily_report")
-            query3 <- sprintf(paste0(
-              "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+            if(data$permission > 1){
+              query3 <- sprintf(paste0(
+                "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
               OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
-              "daily_report")
+                "daily_report")
+            } else{
+              query3 <- sprintf(paste0(
+                "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+              OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"),
+                "daily_report")
+            }
           }
           # Querey's for TAC if the current time is AFTER 1700 #
           else{
@@ -100,15 +106,21 @@ server <- function(input, output, session) {
             query2 <- sprintf(paste0(
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
               "daily_report")
+            if(data$permission > 1){
             query3 <- sprintf(paste0(
               "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ",cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
               "daily_report")
+            } else{
+              query3 <- sprintf(paste0(
+                "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ",cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"),
+                "daily_report")
+            }
           }
-          #incidentData <- dbGetQuery(db, query1)
+
           incidentData <- as.data.frame(dbGetQuery(db, query1))
           names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
           output$dahboardIncident <- renderTable(incidentData)
-          
+           
           dailyData <- as.data.frame(dbGetQuery(db, query2))
           names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardDaily <- renderTable(dailyData)
@@ -117,7 +129,7 @@ server <- function(input, output, session) {
           names(cadetData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardCadet <- renderTable(cadetData)
           dbDisconnect(db)
-      })
+      }))
       
     ## ANALYTICS TAB ##
       observeEvent(input$trendSubmit,{
@@ -151,17 +163,92 @@ server <- function(input, output, session) {
       
     ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
       
+      # Incident Report insert and remove cadets #
+      inserted <- list(c())
+      observeEvent(input$insertBtn, {
+        btn <- input$insertBtn
+        Id <- paste0('keydet', length(inserted))
+        
+        insertUI(
+          selector = "#insertCadetBox",
+          #where = "afterEnd",
+          ui = tags$div(
+            # box(
+            #   title = sprintf("Cadet %s", length(inserted)), status = "primary", solidHeader = TRUE, width = NULL,
+            #   textInput(sprintf("firstName%s", length(inserted)), "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
+            #   textInput(sprintf("midName%s", length(inserted)), "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+            #   textInput(sprintf("lastName%s", length(inserted)), "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
+            #   numericInput(sprintf("roomNum%s", length(inserted)), "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
+            # ), id = testId)
+            box(
+              title = sprintf("Cadet %s", length(inserted)), status = "warning", solidHeader = TRUE, width = NULL,
+              textInput("firstName1", "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
+              textInput("midName1", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+              textInput("lastName1", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
+              numericInput("roomNum1", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
+            ), Id = Id)
+        )
+        inserted <<- c(Id, inserted)
+      })
+      
+      observeEvent(input$removeBtn, {
+        removeUI(
+          selector = paste0('#', inserted)
+        )
+        if(length(inserted) > 1){
+          inserted <<- inserted[-1]
+        }
+      })
+      
       # Incident Report Query #
       observeEvent(input$incidentSubmit,{
         if(input$firstName != "" && input$lastName != "" && input$eventTag != "" && (is.null(input$date) == FALSE)){
+          narrativeString <- gsub("'","''",input$narrative)
           if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
           if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste(input$file)}
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)
+          str <- (length(inserted) - 1)
+          if(str != 0){
+            for(variablei in 1:str){
+              
+              fName <- input$firstName1   ## HARD CODED BUT WORKS FOR 1 CADET EXTRA
+              mName <- input$midName1
+              lName <- input$lastName1
+              roomNum <- input$roomNum1
+              
+              # temp1 <- sprintf("firstName%s", variablei)
+              # fname <- noquote(paste0("input", "$", temp1))
+
+              # if((input$boxyBoi == paste0('keydet', variablei)) == TRUE){
+              #   fName <- input$firstName1
+              #   mName <- input$midName1
+              #   lName <- input$lastName1
+              #   roomNum <- input$roomNum1
+              # }
+
+              # if((input$firstName1 == temp) == TRUE){
+              #   fName <- input$firstName1
+              #   mName <- input$midName1
+              #   lName <- input$lastName1
+              #   roomNum <- input$roomNum1
+              # }
+              
+              if(is.null(roomNum) || is.na(roomNum)){roomNum = (paste(""))}
+              
+              # roomNum <- input$paste0("roomNum", i)
+              query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
+                VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
+                               fName, mName, lName, roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, narrativeString, fileUpload, loggedInUsername)
+              dbGetQuery(db, query)
+            }
+          }
+
+          
           query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
-              VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
-                           input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, input$narrative, fileUpload, loggedInUsername)
+                VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
+                           input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, narrativeString, fileUpload, loggedInUsername)
           dbGetQuery(db, query)
           reset("incidentForm")
           dbDisconnect(db)
@@ -174,13 +261,14 @@ server <- function(input, output, session) {
       # Daily Report Query #
       observeEvent(input$dailyReportSubmit,{
         if((input$dailyEventTag != "" && is.na(input$dailyDate) == FALSE) == TRUE){
+          dailyNarrativeString <- gsub("'","''",input$dailyNarrative)
           table <- "daily_report"
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)
           query <- sprintf(
             "INSERT INTO `greenbook`.`daily_report` (`daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`, `userName`) 
-            VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, input$dailyNarrative, loggedInUsername)
+            VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, dailyNarrativeString, loggedInUsername)
           dbGetQuery(db, query)
           dbDisconnect(db)
           reset("dailyReportForm")
@@ -189,6 +277,37 @@ server <- function(input, output, session) {
           shinyalert("Hold on!", "You have not filled all required fields: Date and Event Type", type = "warning")
         }
       })
+      
+      # Daily Report Distinguished Choices #
+      if(data$permission == 1){
+        insertUI(
+          selector = "#insertDailyType",
+          where = "afterEnd",
+          ui = box(
+            title = "What", status = "primary", solidHeader = TRUE, width = NULL,
+            selectInput("dailyEventTag", "Event Type: (REQUIRED)",
+                        c("Choose one" = "", "Cadet Things 1", "Cadet Things 2", "Cadet Things 3", "Cadet Things 4", "Cadet Things 5")
+            ),
+            textAreaInput(
+              "dailyNarrative", "Narrative:", width = NULL, height = '170px'
+            )
+          )
+        )
+      } else{
+        insertUI(
+          selector = "#insertDailyType",
+          where = "afterEnd",
+          ui = box(
+            title = "What", status = "primary", solidHeader = TRUE, width = NULL,
+            selectInput("dailyEventTag", "Event Type: (REQUIRED)",
+                        c("Choose one" = "", "Officer Things 1", "Officer Things 2", "Officer Things 3", "Officer Things 4", "Officer Things 5")
+            ),
+            textAreaInput(
+              "dailyNarrative", "Narrative:", width = NULL, height = '170px'
+            )
+          )
+        )
+      }
       
       # Searching Query #
       observeEvent(input$searchButton, {
@@ -215,7 +334,7 @@ server <- function(input, output, session) {
         reset("incidentForm")
       })
       
-      observeEvent(input$incidentReset, {
+      observeEvent(input$dailyReportReset, {
         reset("dailyReportForm")
       })
       
