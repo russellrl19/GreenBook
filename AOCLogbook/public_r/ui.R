@@ -78,7 +78,8 @@ ui <- dashboardPage(
               title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
               column(12, tableOutput('dahboardCadet'))
             ))
-          )
+          ),
+          br(), br()
         ),
         ## DATA ANALYSIS ##
         tabItem(tabName = "dataAnalysis",
@@ -194,7 +195,7 @@ ui <- dashboardPage(
                 actionButton("incidentReset", "Clear", class="btn-lg"),
                 useShinyalert(),
                 actionButton("incidentSubmit", "Submit", class="btn-lg"),
-                br(), br()
+                br(), br(), br()
               )
             )
           )
@@ -213,7 +214,7 @@ ui <- dashboardPage(
                 ), p(id="insertDailyType"),
                 actionButton("dailyReportReset", "Clear", class="btn-lg"),
                 actionButton("dailyReportSubmit", "Submit", class="btn-lg"),
-                br(), br()
+                br(), br(), br()
               )
             )
           )
@@ -297,6 +298,15 @@ ui <- dashboardPage(
           )
         )
       )
-    )
+    ),
+    tags$footer("Copyright 2019, GreenBook, Maddison Curran and Ryan Russell. All rights reserved.", style = "
+              position:absolute;
+                    bottom:0;
+                    height:50px;   /* Height of the footer */
+                    color: black;
+                    padding-top: 100px;
+                    padding: 10px;
+                    z-index: 1000;")
   )
+#"Copyright 2019, GreenBook, Maddison Curran and Ryan Russell. All rights reserved."
 )
