@@ -308,5 +308,4 @@ ui <- dashboardPage(
                     padding: 10px;
                     z-index: 1000;")
   )
-#"Copyright 2019, GreenBook, Maddison Curran and Ryan Russell. All rights reserved."
 )
