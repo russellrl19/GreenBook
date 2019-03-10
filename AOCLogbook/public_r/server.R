@@ -4,20 +4,20 @@ server <- function(input, output, session) {
   
 ## DATABASE SETUP ##
   # FOR AWS #
-  options(mysql = list(
-    "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
-    "port" = 3306,
-    "user" = "greenbookadmin",
-    "password" = "~L7pPw}UZ;8*"
-  ))
+  # options(mysql = list(
+  #   "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
+  #   "port" = 3306,
+  #   "user" = "greenbookadmin",
+  #   "password" = "~L7pPw}UZ;8*"
+  # ))
 
   # FOR LOCAL #
-  # options(mysql = list(
-  #   "host" = "localhost",
-  #   "port" = 3306,
-  #   "user" = "root",
-  #   "password" = "root"
-  # ))
+  options(mysql = list(
+    "host" = "localhost",
+    "port" = 3306,
+    "user" = "root",
+    "password" = "root"
+  ))
 
 ## LOGIN SETUP ##
   shinyjs::hide("userForm")
