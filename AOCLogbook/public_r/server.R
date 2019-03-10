@@ -4,20 +4,20 @@ server <- function(input, output, session) {
   
 ## DATABASE SETUP ##
   # FOR AWS #
-  # options(mysql = list(
-  #   "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
-  #   "port" = 3306,
-  #   "user" = "greenbookadmin",
-  #   "password" = "~L7pPw}UZ;8*"
-  # ))
+  options(mysql = list(
+    "host" = "greenbook.cd0e9wwmxm8h.us-east-1.rds.amazonaws.com",
+    "port" = 3306,
+    "user" = "greenbookadmin",
+    "password" = "~L7pPw}UZ;8*"
+  ))
 
   # FOR LOCAL #
-  options(mysql = list(
-    "host" = "localhost",
-    "port" = 3306,
-    "user" = "root",
-    "password" = "root"
-  ))
+  # options(mysql = list(
+  #   "host" = "localhost",
+  #   "port" = 3306,
+  #   "user" = "root",
+  #   "password" = "root"
+  # ))
 
 ## LOGIN SETUP ##
   shinyjs::hide("userForm")
@@ -62,8 +62,12 @@ server <- function(input, output, session) {
         shinyjs::show("tacBox")
       }
       
-    ## DASHBOARD UPDATES ##
-      observeEvent(c(input$submitLogin, input$incidentSubmit, input$dailyReportSubmit), {
+      ## DASHBOARD UPDATES ##
+      toListen <- reactive({
+        c(input$submitLogin,input$incidentSubmit,input$dailyReportSubmit)
+      })
+      
+      observeEvent(toListen(), delay(500, {
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host, 
                           port = options()$mysql$port, user = options()$mysql$user, 
                           password = options()$mysql$password)
@@ -112,11 +116,11 @@ server <- function(input, output, session) {
                 "daily_report")
             }
           }
-          #incidentData <- dbGetQuery(db, query1)
+
           incidentData <- as.data.frame(dbGetQuery(db, query1))
           names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
           output$dahboardIncident <- renderTable(incidentData)
-          
+           
           dailyData <- as.data.frame(dbGetQuery(db, query2))
           names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardDaily <- renderTable(dailyData)
@@ -125,7 +129,7 @@ server <- function(input, output, session) {
           names(cadetData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardCadet <- renderTable(cadetData)
           dbDisconnect(db)
-      })
+      }))
       
     ## ANALYTICS TAB ##
       observeEvent(input$trendSubmit,{
@@ -234,7 +238,7 @@ server <- function(input, output, session) {
               if(is.null(roomNum) || is.na(roomNum)){roomNum = (paste(""))}
               
               # roomNum <- input$paste0("roomNum", i)
-              query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `image_path`, `officer`)
+              query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
                 VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
                                fName, mName, lName, roomNum, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, narrativeString, fileUpload, loggedInUsername)
               dbGetQuery(db, query)
@@ -242,7 +246,7 @@ server <- function(input, output, session) {
           }
 
           
-          query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `image_path`, `officer`)
+          query <- sprintf("INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `incident_attachment`, `officer`)
                 VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
                            input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, narrativeString, fileUpload, loggedInUsername)
           dbGetQuery(db, query)
