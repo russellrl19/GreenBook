@@ -20,7 +20,6 @@ server <- function(input, output, session) {
   # ))
 
 ## LOGIN SETUP ##
-  shinyjs::hide("userForm")
   loggedIn <- FALSE
   observeEvent(input$submitLogin,{
     databaseName <- "greenbook"
@@ -36,7 +35,7 @@ server <- function(input, output, session) {
       shinyalert("Uh oh!", "Please enter a valid username and password", type = "error")
     }
     else{
-      shinyjs::show("userForm")
+      show("userForm")
       shinyjs::hide(id = "loginForm")
       loggedIn <- TRUE
       loggedInUsername <- input$username

@@ -53,7 +53,7 @@ ui <- dashboardPage(
         textInput("username", "Username:"),
         passwordInput("password", "Password:"),
         actionButton("submitLogin", "Submit")), 
-    div(id = "userForm",
+    hidden(div(id = "userForm",
         tabItems(
           ## DASHBOARD ##
           tabItem(tabName = "dashboard",
@@ -298,7 +298,7 @@ ui <- dashboardPage(
                   )
           )
         )
-    ),
+    )),
     tags$footer("Copyright 2019, GreenBook Inc. Maddison Curran and Ryan Russell. All rights reserved.", style = "
               position:absolute;
                     bottom:0;
