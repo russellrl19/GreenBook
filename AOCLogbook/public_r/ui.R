@@ -305,7 +305,6 @@ ui <- dashboardPage(
                     height:50px;   /* Height of the footer */
                     color: black;
                     padding-top: 100px;
-                    padding: 10px;
-                    z-index: 1000;")
+                    padding: 10px;")
   )
   )
