@@ -1,22 +1,12 @@
 ## ui.R ##
 
-library(shiny)
-library(shinydashboard)
-library(shinyTime)
-library(RMySQL)
-library(dbConnect)
-library(DBI)
-library(gWidgets)
-library(shinyjs)
-library(shinyalert)
-library(plotly)
-library(ggplot2)
-library(scales)
-library(glue)
-library(grid)
-library(RColorBrewer)
-library(shinyBS)
+library(shiny, shinydashboard, shinyTime)
+library(RMySQL, dbConnect, DBI, "gWidgets")
+library(shinyjs, shinyalert, shinyBS)
+library(plotly, ggplot2)
+library(scales, glue, grid, "RColorBrewer")
 library(rmarkdown)
+library(png, jpeg)
 
 Sys.setenv(TZ="America/New_York")
 
@@ -69,7 +59,7 @@ ui <- dashboardPage(
                 h2("Recent TAC Data"),
                 box(
                   title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = NULL,
-                  column(12, tableOutput('dahboardIncident'))
+                  column(12, tableOutput('dahboardIncident'), imageOutput("myImage"))
                 ),
                 box(
                   title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
@@ -199,7 +189,7 @@ ui <- dashboardPage(
                       )
                     ),
                     textAreaInput("narrative", "Narrative:", width = NULL, height = '170px'),
-                    fileInput("file", "Attach Picture:", width = NULL)
+                    fileInput("file", "Attach Picture:", accept = c('image/png', 'image/jpeg'), width = NULL)
                   ),
                   actionButton("incidentReset", "Clear", class="btn-lg"),
                   useShinyalert(),

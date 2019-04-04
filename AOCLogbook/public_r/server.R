@@ -160,6 +160,15 @@ server <- function(input, output, session) {
           incidentData <- as.data.frame(dbGetQuery(db, query1))
           names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
           output$dahboardIncident <- renderTable(incidentData)
+          output$myImage <- renderImage({
+            outfile <- 'C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/www/images/ReverseFlash.JPEG'
+            jpeg(outfile, width = 400, height = 300)
+            list(src = outfile,
+                 contentType = 'images/jpeg',
+                 width = 400,
+                 height = 300,
+                 alt = "This is alternate text")
+          }, deleteFile = TRUE)
            
           dailyData <- as.data.frame(dbGetQuery(db, query2))
           names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
@@ -179,8 +188,7 @@ server <- function(input, output, session) {
               on.exit(setwd(owd))
               file.copy(src, 'report.Rmd', overwrite = TRUE)
               out <- rmarkdown::render(
-                'report.Rmd', 
-                #output_format = "word_document", encoding="utf-8",
+                'report.Rmd',
                 word_document(reference_docx = "C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/report_template.docx"),
                 params = list(officerIncidentData = incidentData, officerDailyData = dailyData, cadetDailyData = cadetData)
               )
@@ -257,7 +265,13 @@ server <- function(input, output, session) {
         if(input$firstName != "" && input$lastName != "" && input$eventTag != "" && (is.null(input$date) == FALSE)){
           narrativeString <- gsub("'","''",input$narrative)
           if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
-          if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste(input$file)}
+          observeEvent(input$file, {
+            inFile <- input$file
+            if (is.null(inFile))
+              return()
+            file.copy(inFile$datapath, file.path("C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/www/images", inFile$name))
+          })
+          if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste0("C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/www/images/", input$file)}
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)
