@@ -96,7 +96,7 @@ server <- function(input, output, session) {
           if(substring(Sys.time(), 12) < '17:00:00'){
             query1 <- sprintf(
               paste0(
-                "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
+                "SELECT cadet_lname, incident_type, incident_date, incident_time, image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
                 OR incident_date = '", Sys.Date(), "'"
               ),
               "incident_report"
@@ -125,12 +125,19 @@ server <- function(input, output, session) {
                 "daily_report"
               )
             }
+            imageQuery <- sprintf(
+              paste0(
+                "SELECT image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
+                OR incident_date = '", Sys.Date(), "'"
+              ),
+              "incident_report"
+            )
           }
           # Querey's for TAC if the current time is AFTER 1700 #
           else{
             query1 <- sprintf(
               paste0(
-                "SELECT cadet_lname, incident_type, incident_date, incident_time FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date(), "' AND incident_time  > ' 17:00:00 '"
+                "SELECT cadet_lname, incident_type, incident_date, incident_time, image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date(), "' AND incident_time  > ' 17:00:00 '"
               ),
               "incident_report"
             )
@@ -150,25 +157,48 @@ server <- function(input, output, session) {
             }else{
               query3 <- sprintf(
                 paste0(
-                  "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ",cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
+                  "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ", cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
                 ),
                 "daily_report"
               )
             }
+            imageQuery <- sprintf(
+              paste0(
+                "SELECT image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date(), "' AND incident_time  > ' 17:00:00 '"
+              ),
+              "incident_report"
+            )
           }
-
-          incidentData <- as.data.frame(dbGetQuery(db, query1))
-          names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
+          
+          incidentData <- data.frame(dbGetQuery(db, query1))
+          names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time", "Image")
+          #incidentData$Image <- a(substring(incidentData$Image, 74), href="C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/www/images/computer.JPEG")
+          #incidentData$Image <- paste0("<a href='",incidentData$Image,"'>", substring(incidentData$Image, 74),"</a>")
+          incidentData$Image = tags$a(href=incidentData$Image, substring(incidentData$Image, 74))
           output$dahboardIncident <- renderTable(incidentData)
-          output$myImage <- renderImage({
-            outfile <- 'C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/www/images/ReverseFlash.JPEG'
-            jpeg(outfile, width = 400, height = 300)
-            list(src = outfile,
-                 contentType = 'images/jpeg',
-                 width = 400,
-                 height = 300,
-                 alt = "This is alternate text")
-          }, deleteFile = TRUE)
+          # imageName <- as.data.frame(dbGetQuery(db, imageQuery))
+          # output$myImage <- renderImage({
+          #   filename <- normalizePath(
+          #     file.path(imageName)
+          #   )
+          #   list(src = filename)
+          # }, deleteFile = FALSE)
+          
+          
+          # databaseName <- "greenbook"
+          # table <- "user"
+          # db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
+          #                                port = options()$mysql$port, user = options()$mysql$user,
+          #                                password = options()$mysql$password
+          #                    )
+          # query1 <- sprintf(
+          #        paste0(
+          #     +         "SELECT cadet_lname, incident_type, incident_date, incident_time, image_path FROM greenbook.incident_report WHERE officer = 'test' AND incident_date = '2019-04-04' AND incident_time  > ' 17:00:00 '"
+          #     +     ),
+          #   +     "incident_report"
+          #   + )
+          # > incidentData <- data.frame(dbGetQuery(db, query1))
+          # > names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time", "Image")
            
           dailyData <- as.data.frame(dbGetQuery(db, query2))
           names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
@@ -189,7 +219,7 @@ server <- function(input, output, session) {
               file.copy(src, 'report.Rmd', overwrite = TRUE)
               out <- rmarkdown::render(
                 'report.Rmd',
-                word_document(reference_docx = "C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/report_template.docx"),
+                word_document(reference_docx = "C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/report_template.docx"),
                 params = list(officerIncidentData = incidentData, officerDailyData = dailyData, cadetDailyData = cadetData)
               )
               file.rename(out, file)
@@ -269,9 +299,9 @@ server <- function(input, output, session) {
             inFile <- input$file
             if (is.null(inFile))
               return()
-            file.copy(inFile$datapath, file.path("C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/www/images", inFile$name))
+            file.copy(inFile$datapath, file.path("C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/www/images/", inFile$name))
           })
-          if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste0("C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/www/images/", input$file)}
+          if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste0("C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/www/images/", input$file)}
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)

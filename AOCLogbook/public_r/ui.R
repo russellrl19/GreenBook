@@ -1,12 +1,24 @@
 ## ui.R ##
 
-library(shiny, shinydashboard, shinyTime)
-library(RMySQL, dbConnect, DBI, "gWidgets")
-library(shinyjs, shinyalert, shinyBS)
-library(plotly, ggplot2)
-library(scales, glue, grid, "RColorBrewer")
+library(shiny)
+library(shinydashboard)
+library(shinyTime)
+library(RMySQL)
+library(dbConnect)
+library(DBI)
+library(gWidgets)
+library(shinyjs)
+library(shinyalert)
+library(shinyBS)
+library(plotly)
+library(ggplot2)
+library(scales)
+library(glue)
+library(grid)
+library(RColorBrewer)
 library(rmarkdown)
-library(png, jpeg)
+library(png)
+library(jpeg)
 
 Sys.setenv(TZ="America/New_York")
 
@@ -59,7 +71,7 @@ ui <- dashboardPage(
                 h2("Recent TAC Data"),
                 box(
                   title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = NULL,
-                  column(12, tableOutput('dahboardIncident'), imageOutput("myImage"))
+                  column(12, tableOutput('dahboardIncident'))#, imageOutput("myImage"))
                 ),
                 box(
                   title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
