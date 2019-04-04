@@ -16,6 +16,7 @@ library(glue)
 library(grid)
 library(RColorBrewer)
 library(shinyBS)
+library(rmarkdown)
 
 Sys.setenv(TZ="America/New_York")
 
@@ -39,7 +40,6 @@ ui <- dashboardPage(
       });"))),
     sidebarMenu(
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-      menuItem("Formal Report", tabName = "formalReport"),
       menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),
       menuItem("Incident Report", tabName = "incidentReport", icon = icon("book")),
       menuItem("Daily Report", tabName = "dailyReport", icon = icon("globe")),
@@ -64,7 +64,8 @@ ui <- dashboardPage(
             fluidRow(id ="tacBox",
               column(width = 1),
               column(width = 6,
-                downloadButton("downloadFormalReport", "Generate report"),
+                h2("Formal Report"),
+                downloadButton('downloadReport'),
                 h2("Recent TAC Data"),
                 box(
                   title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = NULL,

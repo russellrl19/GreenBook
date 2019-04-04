@@ -169,6 +169,24 @@ server <- function(input, output, session) {
           names(cadetData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardCadet <- renderTable(cadetData)
           dbDisconnect(db)
+          output$downloadReport <- downloadHandler(
+            filename = function() {
+              paste("Formal Report ", Sys.Date(), ".docx", sep = "")
+            },
+            content = function(file) {
+              src <- normalizePath('report.Rmd')
+              owd <- setwd(tempdir())
+              on.exit(setwd(owd))
+              file.copy(src, 'report.Rmd', overwrite = TRUE)
+              out <- rmarkdown::render(
+                'report.Rmd', 
+                #output_format = "word_document", encoding="utf-8",
+                word_document(reference_docx = "C:/Users/Ryan/Documents/GreenBook/AOCLogbook/public_r/report_template.docx"),
+                params = list(officerIncidentData = incidentData, officerDailyData = dailyData, cadetDailyData = cadetData)
+              )
+              file.rename(out, file)
+            }
+          )
       }))
       
     ## ANALYTICS TAB ##

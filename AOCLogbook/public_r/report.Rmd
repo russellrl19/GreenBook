@@ -1,0 +1,28 @@
+---
+title: "Formal Report"
+params:
+  cadetDailyData: NA
+  officerDailyData: NA
+  officerIncidentData: NA
+output: 
+  word_document:
+    reference_docx: report_template.docx
+---
+
+# Officer
+### Incident Reports
+```{r echo = FALSE, results = 'asis'}
+knitr::kable(params$officerIncidentData)
+
+```
+
+### Daily Reports
+```{r echo = FALSE, results = 'asis'}
+knitr::kable(params$officerDailyData)
+```
+
+# Cadet
+### Daily Reports
+```{r echo = FALSE, results = 'asis'}
+knitr::kable(params$cadetDailyData)
+```
