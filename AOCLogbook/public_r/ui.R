@@ -65,13 +65,13 @@ ui <- dashboardPage(
             h2("Dashboard"),
             fluidRow(id ="tacBox",
               column(width = 1),
-              column(width = 6,
+              column(width = 9,
                 h2("Formal Report"),
                 downloadButton('downloadReport'),
                 h2("Recent TAC Data"),
                 box(
                   title = "Your Submissions: Incident Reports", status = "primary", solidHeader = TRUE, width = NULL,
-                  column(12, tableOutput('dahboardIncident'))#, imageOutput("myImage"))
+                  column(12, dataTableOutput('dahboardIncident'))
                 ),
                 box(
                   title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,

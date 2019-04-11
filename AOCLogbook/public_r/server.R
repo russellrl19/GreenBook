@@ -170,35 +170,12 @@ server <- function(input, output, session) {
             )
           }
           
-          incidentData <- data.frame(dbGetQuery(db, query1))
+          incidentData <- as.data.frame(dbGetQuery(db, query1))
           names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time", "Image")
-          #incidentData$Image <- a(substring(incidentData$Image, 74), href="C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/www/images/computer.JPEG")
-          #incidentData$Image <- paste0("<a href='",incidentData$Image,"'>", substring(incidentData$Image, 74),"</a>")
-          incidentData$Image = tags$a(href=incidentData$Image, substring(incidentData$Image, 74))
-          output$dahboardIncident <- renderTable(incidentData)
-          # imageName <- as.data.frame(dbGetQuery(db, imageQuery))
-          # output$myImage <- renderImage({
-          #   filename <- normalizePath(
-          #     file.path(imageName)
-          #   )
-          #   list(src = filename)
-          # }, deleteFile = FALSE)
-          
-          
-          # databaseName <- "greenbook"
-          # table <- "user"
-          # db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
-          #                                port = options()$mysql$port, user = options()$mysql$user,
-          #                                password = options()$mysql$password
-          #                    )
-          # query1 <- sprintf(
-          #        paste0(
-          #     +         "SELECT cadet_lname, incident_type, incident_date, incident_time, image_path FROM greenbook.incident_report WHERE officer = 'test' AND incident_date = '2019-04-04' AND incident_time  > ' 17:00:00 '"
-          #     +     ),
-          #   +     "incident_report"
-          #   + )
-          # > incidentData <- data.frame(dbGetQuery(db, query1))
-          # > names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time", "Image")
+          if(is.null(incidentData$Image) == FALSE) {
+            incidentData$Image <- paste0("<a href='",incidentData$Image,"'>",substring(incidentData$Image, 17),"</a>")
+          }
+          output$dahboardIncident <- renderDataTable({incidentData}, escape = FALSE)
            
           dailyData <- as.data.frame(dbGetQuery(db, query2))
           names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
@@ -219,7 +196,7 @@ server <- function(input, output, session) {
               file.copy(src, 'report.Rmd', overwrite = TRUE)
               out <- rmarkdown::render(
                 'report.Rmd',
-                word_document(reference_docx = "C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/report_template.docx"),
+                word_document(reference_docx = "report_template.docx"),
                 params = list(officerIncidentData = incidentData, officerDailyData = dailyData, cadetDailyData = cadetData)
               )
               file.rename(out, file)
@@ -295,13 +272,13 @@ server <- function(input, output, session) {
         if(input$firstName != "" && input$lastName != "" && input$eventTag != "" && (is.null(input$date) == FALSE)){
           narrativeString <- gsub("'","''",input$narrative)
           if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
-          observeEvent(input$file, {
-            inFile <- input$file
-            if (is.null(inFile))
-              return()
-            file.copy(inFile$datapath, file.path("C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/www/images/", inFile$name))
-          })
-          if(is.null(input$file)){fileUpload <- (paste(""))} else{fileUpload <- paste0("C:/Users/rlr08/Documents/GitHub/GreenBook/AOCLogbook/public_r/www/images/", input$file)}
+          inFile <- input$file
+          file.copy(inFile$datapath, file.path("C:/windows/temp/", inFile$name))
+          if(is.null(input$file)){fileUpload <- (paste(""))} else{
+              fileUpload <- paste0("C:/windows/temp/", input$file)
+              file.copy(inFile$datapath, file.path("C:/windows/temp/", inFile$name))
+            }
+          
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)

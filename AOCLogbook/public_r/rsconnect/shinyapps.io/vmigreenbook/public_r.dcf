@@ -5,9 +5,9 @@ account: vmigreenbook
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 769708
-bundleId: 1985705
+bundleId: 2001959
 url: https://vmigreenbook.shinyapps.io/public_r/
-when: 1554354924.96511
+when: 1554946912.58271
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: www/bootstrap.css|www/message-handler.js|www/spider.png|www/styles.css
+ignoredFiles: app.R|homework5work.R|www/images/computer.JPEG|www/images/IMG_0083.JPG|www/images/IMG_3964.JPG|www/images/kat.PNG|www/images/ReverseFlash.JPEG
