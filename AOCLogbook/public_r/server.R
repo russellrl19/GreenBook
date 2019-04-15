@@ -125,13 +125,6 @@ server <- function(input, output, session) {
                 "daily_report"
               )
             }
-            imageQuery <- sprintf(
-              paste0(
-                "SELECT image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date() - 1, "' AND incident_time > '17:00:00'
-                OR incident_date = '", Sys.Date(), "'"
-              ),
-              "incident_report"
-            )
           }
           # Querey's for TAC if the current time is AFTER 1700 #
           else{
@@ -162,20 +155,18 @@ server <- function(input, output, session) {
                 "daily_report"
               )
             }
-            imageQuery <- sprintf(
-              paste0(
-                "SELECT image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", Sys.Date(), "' AND incident_time  > ' 17:00:00 '"
-              ),
-              "incident_report"
-            )
           }
           
           incidentData <- as.data.frame(dbGetQuery(db, query1))
           names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time", "Image")
-          if(is.null(incidentData$Image) == FALSE) {
-            incidentData$Image <- paste0("<a href='",incidentData$Image,"'>",substring(incidentData$Image, 17),"</a>")
-          }
+          if(nrow(incidentData) == 0){} else if(is.null(incidentData$Image) == FALSE){
+            incidentData$Image <- paste0("<a href='",incidentData$Image,"' target='_blank'>",substring(incidentData$Image,51),"</a>")
+            
+          }else{incidentData$Image <- ""}
           output$dahboardIncident <- renderDataTable({incidentData}, escape = FALSE)
+          
+          incidentReportData <- as.data.frame(dbGetQuery(db, query1))
+          names(incidentReportData) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
            
           dailyData <- as.data.frame(dbGetQuery(db, query2))
           names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
@@ -185,21 +176,23 @@ server <- function(input, output, session) {
           names(cadetData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardCadet <- renderTable(cadetData)
           dbDisconnect(db)
+          
+          temp_folder <- tempfile()
+          onStop(function() {
+            cat("Removing Temporary Files and Folders\n")
+            unlink(temp_folder, recursive=TRUE)
+          })
+          dir.create(temp_folder)
           output$downloadReport <- downloadHandler(
-            filename = function() {
-              paste("Formal Report ", Sys.Date(), ".docx", sep = "")
-            },
+            filename = paste("Formal Report ", Sys.Date(), ".docx", sep = ""),
             content = function(file) {
-              src <- normalizePath('report.Rmd')
-              owd <- setwd(tempdir())
-              on.exit(setwd(owd))
-              file.copy(src, 'report.Rmd', overwrite = TRUE)
-              out <- rmarkdown::render(
-                'report.Rmd',
-                word_document(reference_docx = "report_template.docx"),
-                params = list(officerIncidentData = incidentData, officerDailyData = dailyData, cadetDailyData = cadetData)
+              tempReport <- file.path(temp_folder, "report.Rmd")
+              tempTemplate <- file.path(temp_folder, "report_template.docx")
+              file.copy("report.Rmd", tempReport, overwrite = TRUE)
+              file.copy("report_template.docx", tempTemplate, overwrite = TRUE)
+              rmarkdown::render(
+                tempReport, 'word_document', output_file = file, params = list(officerIncidentData = incidentReportData, officerDailyData = dailyData, cadetDailyData = cadetData)
               )
-              file.rename(out, file)
             }
           )
       }))
@@ -273,10 +266,13 @@ server <- function(input, output, session) {
           narrativeString <- gsub("'","''",input$narrative)
           if((is.na(input$roomNum))){roomNumber <- (paste(""))} else{roomNumber <- input$roomNum}
           inFile <- input$file
-          file.copy(inFile$datapath, file.path("C:/windows/temp/", inFile$name))
+          file.copy(inFile$datapath, file.path("www/images", inFile$name))
           if(is.null(input$file)){fileUpload <- (paste(""))} else{
-              fileUpload <- paste0("C:/windows/temp/", input$file)
-              file.copy(inFile$datapath, file.path("C:/windows/temp/", inFile$name))
+            ## THIS WORKS FOR LOCAL ##
+              # fileUpload <- paste0("images/", input$file)
+            ## THIS WORKS FOR SHINYAPPS.IO ##
+              fileUpload <- paste0("https://vmigreenbook.shinyapps.io/public_r/images/", input$file)
+              file.copy(inFile$datapath, file.path("www/images", inFile$name))
             }
           
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
