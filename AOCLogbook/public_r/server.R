@@ -212,24 +212,20 @@ server <- function(input, output, session) {
       trendData <- dbGetQuery(db, trendQuery)
       dbDisconnect(db)
       output$trendPlot <- renderPlot({
-        chartSeries(
-          dataInput(), theme = chartTheme("white"),
-          type = "line", log.scale = input$log, TA = NULL)
-
-        # trend <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
-        # names(trend) <- c("Date", "Freq")
-        # df <- data.frame(
-        #   Date = as.Date(trend$Date, "%Y-%m-%d"),
-        #   Frequency = trend$Freq
-        # )
-        # ggplot(df, aes(x=Date, y=Frequency)) +
-        #   geom_bar(stat = "identity") + theme_bw() +
-        #   labs(x = "Date", y = "Frequency") +
-        #   scale_x_date(labels = date_format("%m-%d-%Y")) +
-        #   theme(axis.text.x = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"),
-        #         axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),
-        #         axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
-        #         axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
+        trend <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
+        names(trend) <- c("Date", "Freq")
+        df <- data.frame(
+          Date = as.Date(trend$Date, "%Y-%m-%d"),
+          Frequency = trend$Freq
+        )
+        ggplot(df, aes(x=Date, y=Frequency)) +
+          geom_bar(stat = "identity") + theme_bw() +
+          labs(x = "Date", y = "Frequency") +
+          scale_x_date(labels = date_format("%m-%d-%Y")) +
+          theme(axis.text.x = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"),
+                axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),
+                axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
+                axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
       })
     })
 
@@ -457,6 +453,10 @@ server <- function(input, output, session) {
 
       observeEvent(input$SearchReset, {
         reset("searchForm")
+      })
+      
+      observeEvent(input$userReset, {
+        reset("registerForm")
       })
     }
   })

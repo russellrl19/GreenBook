@@ -19,7 +19,6 @@ library(RColorBrewer)
 library(rmarkdown)
 library(png)
 library(jpeg)
-library(quantmod)
 
 Sys.setenv(TZ="America/New_York")
 
@@ -47,7 +46,7 @@ ui <- dashboardPage(
       menuItem("Incident Report", tabName = "incidentReport", icon = icon("book")),
       menuItem("Daily Report", tabName = "dailyReport", icon = icon("globe")),
       menuItem("Search Reports", tabName = "searchReports", icon = icon("search")),
-      menuItem("Register User", tabName = "registerUser")
+      menuItem("Register User", tabName = "registerUser", icon = icon("plus"))
     )
   ),
   dashboardBody(
@@ -57,7 +56,10 @@ ui <- dashboardPage(
     div(id = "loginForm",
       textInput("username", "Username:"),
       passwordInput("password", "Password:"),
-      actionButton("submitLogin", "Submit")
+      actionButton("submitLogin", "Submit"),
+      
+      h2("Register here")
+      
     ),
     hidden(
       div(id = "userForm",
