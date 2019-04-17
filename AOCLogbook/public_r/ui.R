@@ -58,7 +58,7 @@ ui <- dashboardPage(
       textInput("username", "Username:"),
       passwordInput("password", "Password:"),
       actionButton("submitLogin", "Submit")
-    ), 
+    ),
     hidden(
       div(id = "userForm",
         tabItems(
@@ -83,7 +83,7 @@ ui <- dashboardPage(
             ),
             fluidRow(
               column(width = 1),
-              column(width = 6,
+              column(width = 9,
                 br(), br(), h2("Recent Cadet Data"),
                 box(
                   title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
@@ -96,7 +96,7 @@ ui <- dashboardPage(
           tabItem(tabName = "dataAnalysis",
             h2("Data Analysis"), br(), br(),
             box(title = "Choose trend:", status = "warning", solidHeader = TRUE, width = 4,
-              selectInput("trendType", "Trend:", 
+              selectInput("trendType", "Trend:",
                 c("Choose one" = "",
                   "Absence Barracks/Post",
                   "Weapons",
@@ -134,7 +134,6 @@ ui <- dashboardPage(
               ),
               dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = Sys.Date() - 30, width = '400px'),
               dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px')
-              # actionButton("trendSubmit", "Plot", icon("paper-plane"))
             ),
             box(title = "Trends!", status = "primary", solidHeader = TRUE,
               plotOutput("trendPlot")
@@ -155,9 +154,9 @@ ui <- dashboardPage(
                     textInput("lastName", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
                     numericInput("roomNum", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
                   ),
-                  actionButton("insertBtn", "Add cadet"), 
-                  actionButton("removeBtn", "Remove cadet"), 
-                  br(), br(), 
+                  actionButton("insertBtn", "Add cadet"),
+                  actionButton("removeBtn", "Remove cadet"),
+                  br(), br(),
                   tags$div(id = 'insertCadetBox'),
                   box(
                     title = "When", status = "primary", solidHeader = TRUE, width = NULL,
@@ -224,7 +223,7 @@ ui <- dashboardPage(
                     title = "When", status = "primary", solidHeader = TRUE, width = NULL,
                     dateInput("dailyDate", "Date of event: (REQUIRED)", format = "mm-dd-yyyy", width = NULL, value = Sys.Date()),
                     timeInput("dailyTime", "Time of event:", seconds = FALSE,  value = Sys.time())
-                  ), 
+                  ),
                   p(id="insertDailyType"),
                   actionButton("dailyReportReset", "Clear", class="btn-lg"),
                   actionButton("dailyReportSubmit", "Submit", class="btn-lg"),
@@ -254,7 +253,7 @@ ui <- dashboardPage(
                   ),
                   box(
                     title = "What", status = "primary", solidHeader = TRUE, width = NULL,
-                    selectInput("searchEventTag", "Event Type:", 
+                    selectInput("searchEventTag", "Event Type:",
                       c("Choose one" = "",
                         "Absence Barracks/Post",
                         "Weapons",

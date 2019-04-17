@@ -1,9 +1,9 @@
 ## server.R ##
 
 server <- function(input, output, session) {
-  
+
 ## DATABASE SETUP ##
-  
+
   # FOR AWS #
   # options(
   #   mysql = list(
@@ -37,8 +37,8 @@ server <- function(input, output, session) {
       paste0(
         "SELECT * FROM greenbook.user
         WHERE username = '", input$username, "' AND password = '", input$password, "';"
-      ), 
-      table, 
+      ),
+      table,
       paste(names(data), collapse = ", ")
     )
     data <- dbGetQuery(db, query)
@@ -60,7 +60,7 @@ server <- function(input, output, session) {
           )
         }
       })
-      
+
       if(data$permission == 1){
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "searchReports"))
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "hide", tabName = "incidentReport"))
@@ -72,27 +72,27 @@ server <- function(input, output, session) {
         session$sendCustomMessage(type = "manipulateMenuItem", message = list(action = "show", tabName = "dataAnalysis"))
         shinyjs::show("tacBox")
       }
-      
+
       ## DASHBOARD UPDATES ##
       toListen <- reactive({
         c(input$submitLogin,input$incidentSubmit,input$dailyReportSubmit)
       })
-      
+
       observeEvent(
-        toListen(), delay(500, {
+        toListen(), delay(600, {
           db <- dbConnect(
-            MySQL(), dbname = databaseName, host = options()$mysql$host, 
-            port = options()$mysql$port, user = options()$mysql$user, 
+            MySQL(), dbname = databaseName, host = options()$mysql$host,
+            port = options()$mysql$port, user = options()$mysql$user,
             password = options()$mysql$password
           )
-          
+
           # Querey's for TAC if the current time is BEFORE 1700 #
           if(data$permission == 1){
             cadet <- "="
           } else{
             cadet <- "!="
           }
-          
+
           if(substring(Sys.time(), 12) < '17:00:00'){
             query1 <- sprintf(
               paste0(
@@ -156,27 +156,27 @@ server <- function(input, output, session) {
               )
             }
           }
-          
+
           incidentData <- as.data.frame(dbGetQuery(db, query1))
           names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time", "Image")
           if(nrow(incidentData) == 0){} else if(is.null(incidentData$Image) == FALSE){
             incidentData$Image <- paste0("<a href='",incidentData$Image,"' target='_blank'>",substring(incidentData$Image,51),"</a>")
-            
+
           }else{incidentData$Image <- ""}
           output$dahboardIncident <- renderDataTable({incidentData}, escape = FALSE)
-          
+
           incidentReportData <- as.data.frame(dbGetQuery(db, query1))
           names(incidentReportData) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
-           
+
           dailyData <- as.data.frame(dbGetQuery(db, query2))
           names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardDaily <- renderTable(dailyData)
-          
+
           cadetData <- as.data.frame(dbGetQuery(db, query3))
           names(cadetData) <- c("Date", "Time", "Event Type", "Notes", "User")
           output$dahboardCadet <- renderTable(cadetData)
           dbDisconnect(db)
-          
+
           temp_folder <- tempfile()
           # onStop(function() {
           #   cat("Removing Temporary Files and Folders\n")
@@ -196,16 +196,9 @@ server <- function(input, output, session) {
             }
           )
       }))
-      
+
     ## ANALYTICS TAB ##
-      dataInput <- reactive({
-        getSymbols(input$trendType,
-          from = input$fromTrendDate,
-          to = input$toTrendDate,
-          auto.assign = FALSE)
-      })
-      # observeEvent(input$trendSubmit,{
-      output$plot <- renderPlot({ 
+      observeEvent(input$trendType,{
       db <- dbConnect(
         MySQL(), dbname = databaseName, host = options()$mysql$host,
         port = options()$mysql$port, user = options()$mysql$user,
@@ -222,55 +215,57 @@ server <- function(input, output, session) {
         chartSeries(
           dataInput(), theme = chartTheme("white"),
           type = "line", log.scale = input$log, TA = NULL)
-        
+
         # trend <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
         # names(trend) <- c("Date", "Freq")
         # df <- data.frame(
         #   Date = as.Date(trend$Date, "%Y-%m-%d"),
         #   Frequency = trend$Freq
         # )
-        # ggplot(df, aes(x=Date, y=Frequency)) + 
-        #   geom_bar(stat = "identity") + theme_bw() + 
-        #   labs(x = "Date", y = "Frequency") + 
+        # ggplot(df, aes(x=Date, y=Frequency)) +
+        #   geom_bar(stat = "identity") + theme_bw() +
+        #   labs(x = "Date", y = "Frequency") +
         #   scale_x_date(labels = date_format("%m-%d-%Y")) +
         #   theme(axis.text.x = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"),
-        #         axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),  
+        #         axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),
         #         axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
         #         axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
       })
     })
-      
+
     ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
-      
+
       # Incident Report insert and remove cadets #
       inserted <- list(c())
       observeEvent(input$insertBtn, {
         btn <- input$insertBtn
-        Id <- paste0('keydet', length(inserted))
-        
-        insertUI(
-          selector = "#insertCadetBox",
-          ui = tags$div(
-            box(
-              title = sprintf("Cadet %s", length(inserted)), status = "warning", solidHeader = TRUE, width = NULL,
-              textInput("firstName1", "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
-              textInput("midName1", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
-              textInput("lastName1", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
-              numericInput("roomNum1", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
-            ), Id = Id)
-        )
-        inserted <<- c(Id, inserted)
+        Id <- paste0('keydet', (length(inserted) + 1))
+        if(length(inserted) < 5) {
+          insertUI(
+            selector = "#insertCadetBox",
+            ui = tags$div(
+              box(
+                title = sprintf("Cadet %s", length(inserted)), status = "warning", solidHeader = TRUE, width = NULL,
+                textInput(sprintf("firstName%s", length(inserted)), "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
+                textInput(sprintf("midName%s", length(inserted)), "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+                textInput(sprintf("lastName%s", length(inserted)), "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
+                numericInput(sprintf("roomNum%s", length(inserted)), "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
+              ), Id = Id)
+          )
+          inserted <<- c(Id, inserted)
+        }
       })
-      
+
       observeEvent(input$removeBtn, {
         removeUI(
           selector = paste0('#', inserted)
         )
+        print(testInserted)
         if(length(inserted) > 1){
           inserted <<- inserted[-1]
         }
       })
-      
+
       # Incident Report Query #
       observeEvent(input$incidentSubmit,{
         if(input$firstName != "" && input$lastName != "" && input$eventTag != "" && (is.null(input$date) == FALSE)){
@@ -279,27 +274,44 @@ server <- function(input, output, session) {
           inFile <- input$file
           file.copy(inFile$datapath, file.path("www/images", inFile$name))
           if(is.null(input$file)){fileUpload <- (paste(""))} else{
-            ## THIS WORKS FOR LOCAL ##
-              # fileUpload <- paste0("images/", input$file)
-            ## THIS WORKS FOR SHINYAPPS.IO ##
-              fileUpload <- paste0("https://vmigreenbook.shinyapps.io/public_r/images/", input$file)
-              file.copy(inFile$datapath, file.path("www/images", inFile$name))
-            }
-          
+            fileUpload <- paste0("https://vmigreenbook.shinyapps.io/public_r/images/", input$file)
+            file.copy(inFile$datapath, file.path("www/images", inFile$name))
+          }
+
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)
           str <- (length(inserted) - 1)
           if(str != 0){
-            for(variablei in 1:str){
-              
-              fName <- input$firstName1   ## HARD CODED BUT WORKS FOR 1 CADET EXTRA
-              mName <- input$midName1
-              lName <- input$lastName1
-              roomNum <- input$roomNum1
-              
+            for(i in 1:str){
+              fName = ""
+              mName = ""
+              lName = ""
+              roomNum = ""
+              if(i == 1){
+                fName <- input$firstName1
+                mName <- input$midName1
+                lName <- input$lastName1
+                roomNum <- input$roomNum1
+              }else if(i == 2){
+                fName <- input$firstName2
+                mName <- input$midName2
+                lName <- input$lastName2
+                roomNum <- input$roomNum2
+              }else if(i == 3){
+                fName <- input$firstName3
+                mName <- input$midName3
+                lName <- input$lastName3
+                roomNum <- input$roomNum3
+              }else if(i == 4){
+                fName <- input$firstName4
+                mName <- input$midName4
+                lName <- input$lastName4
+                roomNum <- input$roomNum4
+              }
+
               if(is.null(roomNum) || is.na(roomNum)){roomNum = (paste(""))}
-              
+
               query <- sprintf(
                 "INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `image_path`, `officer`)
                 VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
@@ -308,10 +320,10 @@ server <- function(input, output, session) {
               dbGetQuery(db, query)
             }
           }
-          
+
           query <- sprintf(
             "INSERT INTO `greenbook`.`incident_report` (`cadet_fname`, `cadet_minitial`, `cadet_lname`, `cadet_room`, `incident_time`, `incident_date`, `incident_type`, `officer_narrative`, `image_path`, `officer`)
-            VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');", 
+            VALUES('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');",
             input$firstName, input$midName, input$lastName, roomNumber, substring(gsub(":00 ", "", input$time), 11), input$date, input$eventTag, narrativeString, fileUpload, loggedInUsername
           )
           dbGetQuery(db, query)
@@ -322,7 +334,7 @@ server <- function(input, output, session) {
           shinyalert("Hold on!", "You have not filled all required fields: First Name, Last Name, Incident Type, and Date", type = "warning")
         }
       })
-    
+
       # Daily Report Query #
       observeEvent(input$dailyReportSubmit,{
         if((input$dailyEventTag != "" && is.na(input$dailyDate) == FALSE) == TRUE){
@@ -334,7 +346,7 @@ server <- function(input, output, session) {
             password = options()$mysql$password
           )
           query <- sprintf(
-            "INSERT INTO `greenbook`.`daily_report` (`daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`, `userName`) 
+            "INSERT INTO `greenbook`.`daily_report` (`daily_date`, `daily_time`, `daily_event_type`, `daily_event_narrative`, `userName`)
             VALUES('%s', '%s', '%s', '%s', '%s');", input$dailyDate, substring(gsub(":00 ", "", input$dailyTime), 11), input$dailyEventTag, dailyNarrativeString, loggedInUsername
           )
           dbGetQuery(db, query)
@@ -345,7 +357,7 @@ server <- function(input, output, session) {
           shinyalert("Hold on!", "You have not filled all required fields: Date and Event Type", type = "warning")
         }
       })
-      
+
       # Daily Report Distinguished Choices #
       if(data$permission == 1){
         insertUI(
@@ -376,7 +388,7 @@ server <- function(input, output, session) {
           )
         )
       }
-      
+
       # Searching Query #
       observeEvent(input$searchButton, {
         if((input$searchFirstName == "") == FALSE){a <- (paste0(" AND (cadet_fname = '", input$searchFirstName, "')"))} else{a <- (paste0(""))}
@@ -386,8 +398,8 @@ server <- function(input, output, session) {
         if((input$searchEventTag == "") == FALSE){e <- (paste0(" AND (incident_type = '", input$searchEventTag, "')"))} else{e <- (paste0(""))}
         table <- "incident_report"
         db <- dbConnect(
-          MySQL(), dbname = databaseName, host = options()$mysql$host, 
-          port = options()$mysql$port, user = options()$mysql$user, 
+          MySQL(), dbname = databaseName, host = options()$mysql$host,
+          port = options()$mysql$port, user = options()$mysql$user,
           password = options()$mysql$password
         )
         query <- paste0(
@@ -399,7 +411,7 @@ server <- function(input, output, session) {
         names(data) <- c("First Name", "Middile Initial", "Last Name", "Room", "Time", "Date", "Event Type", "Narrative", "User")
         output$table <- renderTable(data)
       })
-      
+
       ## REGISTER A USER ##
       observeEvent(input$userSubmit,{
         table <- "user"
@@ -413,7 +425,7 @@ server <- function(input, output, session) {
         )
         data <- as.data.frame(dbGetQuery(db, query))
         dbDisconnect(db)
-        
+
         if((input$userUserName != "" && is.na(input$userPermissionLevel) == FALSE && input$userPassword1 != "" && input$userPassword1 == input$userPassword2) == TRUE){
           table <- "user"
           db <- dbConnect(
@@ -422,7 +434,7 @@ server <- function(input, output, session) {
             password = options()$mysql$password
           )
           query <- sprintf(
-            "INSERT INTO `greenbook`.`user` (`username`, `password`, `user_firstName`, `user_lastName`, `permission`) 
+            "INSERT INTO `greenbook`.`user` (`username`, `password`, `user_firstName`, `user_lastName`, `permission`)
             VALUES('%s', '%s', '%s', '%s', '%s');", input$userUserName, input$userPassword1, input$userFirstName, input$userLastName, input$userPermissionLevel
           )
           dbGetQuery(db, query)
@@ -433,16 +445,16 @@ server <- function(input, output, session) {
           shinyalert("Hold on!", "You have not filled all required fields: username, and password confirmation", type = "warning")
         }
       })
-      
+
     ## CLEAR FORM BUTTONS ##
       observeEvent(input$incidentReset, {
         reset("incidentForm")
       })
-      
+
       observeEvent(input$dailyReportReset, {
         reset("dailyReportForm")
       })
-      
+
       observeEvent(input$SearchReset, {
         reset("searchForm")
       })
