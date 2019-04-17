@@ -45,8 +45,7 @@ ui <- dashboardPage(
       menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),
       menuItem("Incident Report", tabName = "incidentReport", icon = icon("book")),
       menuItem("Daily Report", tabName = "dailyReport", icon = icon("globe")),
-      menuItem("Search Reports", tabName = "searchReports", icon = icon("search")),
-      menuItem("Register User", tabName = "registerUser", icon = icon("plus"))
+      menuItem("Search Reports", tabName = "searchReports", icon = icon("search"))
     )
   ),
   dashboardBody(
@@ -54,12 +53,43 @@ ui <- dashboardPage(
       tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
     ),
     div(id = "loginForm",
-      textInput("username", "Username:"),
-      passwordInput("password", "Password:"),
-      actionButton("submitLogin", "Submit"),
+      fluidRow(
+        column(width = 1),
+        column(width = 9,
+          h2("Log in"),
+          box(title = "Log in", status = "primary", width = 4,
+            textInput("username", "Username:"),
+            passwordInput("password", "Password:"),
+            actionButton("submitLogin", "Submit") 
+          )
+        )
+      ),
       
-      h2("Register here")
+      br(), br(),
       
+      fluidRow(
+        column(width = 1),
+        column(width = 9,
+          h2("Register"), useShinyjs(),
+          div(id = "registerForm",
+            box(title = "Registration", status = "primary", width = 4,
+              textInput("userFirstName", "First Name:", width = NULL, placeholder = "First Name"),
+              textInput("userLastName", "Last Name:", width = NULL, placeholder = "Last Name"),
+              textInput("userUserName", "Username:", width = NULL, placeholder = "Username"),
+              passwordInput("userPassword1", "Password:", width = NULL),
+              passwordInput("userPassword2", "Password Confirmation:", width = NULL),
+              selectInput("userPermissionLevel", "Permission Level:",
+                c("Choose one" = "",
+                  "Cadet" = "1",
+                  "TAC Officer" = "2"
+                )
+              ),
+              actionButton("userReset", "Clear"),
+              actionButton("userSubmit", "Submit")
+            )
+          )
+        )
+      )
     ),
     hidden(
       div(id = "userForm",
@@ -307,34 +337,11 @@ ui <- dashboardPage(
                 )
               )
             )
-          ),
-        ## REGISTER USER ##
-          tabItem(tabName = "registerUser",
-            h2("Register a User"), useShinyjs(),
-            div(id = "registerForm",
-              fluidRow(
-                column(width = 1),
-                column(width = 6,
-                  box(
-                    title = "User Information", status = "primary", solidHeader = TRUE, width = '250px',
-                    textInput("userFirstName", "First Name:", width = NULL, placeholder = "First Name"),
-                    textInput("userLastName", "Last Name:", width = NULL, placeholder = "Last Name"),
-                    textInput("userUserName", "Username:", width = NULL, placeholder = "Username"),
-                    passwordInput("userPassword1", "Password:", width = NULL),
-                    passwordInput("userPassword2", "Password Confirmation:", width = NULL),
-                    numericInput("userPermissionLevel", "Permission Level:", value = NULL, width = NULL, min = 1, max = 3)
-                  ),
-                  actionButton("userReset", "Clear", class="btn-lg"),
-                  actionButton("userSubmit", "Submit", class="btn-lg"),
-                  br(), br()
-                )
-              )
-            )
           )
         )
       )
     ),
-    tags$footer("Copyright 2019, GreenBook Inc. Maddison Curran and Ryan Russell. All rights reserved.", style = "
+    tags$footer("Copyright 2019, GreenBook Inc. Madison Curran and Ryan Russell. All rights reserved.", style = "
       position:absolute;
       bottom:0;
       height:50px;

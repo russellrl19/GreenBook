@@ -24,6 +24,44 @@ server <- function(input, output, session) {
     )
   )
 
+  ## REGISTER A USER ##
+  observeEvent(input$userSubmit,{
+    table <- "user"
+    db <- dbConnect(
+      MySQL(), dbname = databaseName, host = options()$mysql$host,
+      port = options()$mysql$port, user = options()$mysql$user,
+      password = options()$mysql$password
+    )
+    query <- paste0(
+      "SELECT * FROM greenbook.user"
+    )
+    data <- as.data.frame(dbGetQuery(db, query))
+    dbDisconnect(db)
+    
+    if((input$userUserName != "" && is.na(input$userPermissionLevel) == FALSE && input$userPassword1 != "" && input$userPassword1 == input$userPassword2) == TRUE){
+      table <- "user"
+      db <- dbConnect(
+        MySQL(), dbname = databaseName, host = options()$mysql$host,
+        port = options()$mysql$port, user = options()$mysql$user,
+        password = options()$mysql$password
+      )
+      query <- sprintf(
+        "INSERT INTO `greenbook`.`user` (`username`, `password`, `user_firstName`, `user_lastName`, `permission`)
+            VALUES('%s', '%s', '%s', '%s', '%s');", input$userUserName, input$userPassword1, input$userFirstName, input$userLastName, input$userPermissionLevel
+      )
+      dbGetQuery(db, query)
+      dbDisconnect(db)
+      reset("registerForm")
+      shinyalert("Success!", "You have submitted your daily report.", type = "success")
+    }else{
+      shinyalert("Hold on!", "You have not filled all required fields: username, and password confirmation", type = "warning")
+    }
+  })
+  
+  observeEvent(input$userReset, {
+    reset("registerForm")
+  })
+  
 ## LOGIN SETUP ##
   loggedIn <- FALSE
   observeEvent(input$submitLogin,{
@@ -408,40 +446,6 @@ server <- function(input, output, session) {
         output$table <- renderTable(data)
       })
 
-      ## REGISTER A USER ##
-      observeEvent(input$userSubmit,{
-        table <- "user"
-        db <- dbConnect(
-          MySQL(), dbname = databaseName, host = options()$mysql$host,
-          port = options()$mysql$port, user = options()$mysql$user,
-          password = options()$mysql$password
-        )
-        query <- paste0(
-          "SELECT * FROM greenbook.user"
-        )
-        data <- as.data.frame(dbGetQuery(db, query))
-        dbDisconnect(db)
-
-        if((input$userUserName != "" && is.na(input$userPermissionLevel) == FALSE && input$userPassword1 != "" && input$userPassword1 == input$userPassword2) == TRUE){
-          table <- "user"
-          db <- dbConnect(
-            MySQL(), dbname = databaseName, host = options()$mysql$host,
-            port = options()$mysql$port, user = options()$mysql$user,
-            password = options()$mysql$password
-          )
-          query <- sprintf(
-            "INSERT INTO `greenbook`.`user` (`username`, `password`, `user_firstName`, `user_lastName`, `permission`)
-            VALUES('%s', '%s', '%s', '%s', '%s');", input$userUserName, input$userPassword1, input$userFirstName, input$userLastName, input$userPermissionLevel
-          )
-          dbGetQuery(db, query)
-          dbDisconnect(db)
-          reset("registerForm")
-          shinyalert("Success!", "You have submitted your daily report.", type = "success")
-        }else{
-          shinyalert("Hold on!", "You have not filled all required fields: username, and password confirmation", type = "warning")
-        }
-      })
-
     ## CLEAR FORM BUTTONS ##
       observeEvent(input$incidentReset, {
         reset("incidentForm")
@@ -455,9 +459,6 @@ server <- function(input, output, session) {
         reset("searchForm")
       })
       
-      observeEvent(input$userReset, {
-        reset("registerForm")
-      })
     }
   })
 }
