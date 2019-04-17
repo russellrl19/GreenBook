@@ -19,6 +19,7 @@ library(RColorBrewer)
 library(rmarkdown)
 library(png)
 library(jpeg)
+library(quantmod)
 
 Sys.setenv(TZ="America/New_York")
 
@@ -45,7 +46,8 @@ ui <- dashboardPage(
       menuItem("Data Analysis", tabName = "dataAnalysis", icon = icon("anchor")),
       menuItem("Incident Report", tabName = "incidentReport", icon = icon("book")),
       menuItem("Daily Report", tabName = "dailyReport", icon = icon("globe")),
-      menuItem("Search Reports", tabName = "searchReports", icon = icon("search"))
+      menuItem("Search Reports", tabName = "searchReports", icon = icon("search")),
+      menuItem("Register User", tabName = "registerUser")
     )
   ),
   dashboardBody(
@@ -131,8 +133,8 @@ ui <- dashboardPage(
                 )
               ),
               dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = Sys.Date() - 30, width = '400px'),
-              dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px'),
-              actionButton("trendSubmit", "Plot", icon("paper-plane"))
+              dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px')
+              # actionButton("trendSubmit", "Plot", icon("paper-plane"))
             ),
             box(title = "Trends!", status = "primary", solidHeader = TRUE,
               plotOutput("trendPlot")
@@ -300,6 +302,29 @@ ui <- dashboardPage(
                   div(id = "searchResults",
                     bsModal("Search", "Search Results", "searchButton", size = "large", tableOutput('table'))
                   ),
+                  br(), br()
+                )
+              )
+            )
+          ),
+        ## REGISTER USER ##
+          tabItem(tabName = "registerUser",
+            h2("Register a User"), useShinyjs(),
+            div(id = "registerForm",
+              fluidRow(
+                column(width = 1),
+                column(width = 6,
+                  box(
+                    title = "User Information", status = "primary", solidHeader = TRUE, width = '250px',
+                    textInput("userFirstName", "First Name:", width = NULL, placeholder = "First Name"),
+                    textInput("userLastName", "Last Name:", width = NULL, placeholder = "Last Name"),
+                    textInput("userUserName", "Username:", width = NULL, placeholder = "Username"),
+                    passwordInput("userPassword1", "Password:", width = NULL),
+                    passwordInput("userPassword2", "Password Confirmation:", width = NULL),
+                    numericInput("userPermissionLevel", "Permission Level:", value = NULL, width = NULL, min = 1, max = 3)
+                  ),
+                  actionButton("userReset", "Clear", class="btn-lg"),
+                  actionButton("userSubmit", "Submit", class="btn-lg"),
                   br(), br()
                 )
               )

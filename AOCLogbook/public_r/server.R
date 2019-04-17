@@ -178,10 +178,10 @@ server <- function(input, output, session) {
           dbDisconnect(db)
           
           temp_folder <- tempfile()
-          onStop(function() {
-            cat("Removing Temporary Files and Folders\n")
-            unlink(temp_folder, recursive=TRUE)
-          })
+          # onStop(function() {
+          #   cat("Removing Temporary Files and Folders\n")
+          #   unlink(temp_folder, recursive=TRUE)
+          # })
           dir.create(temp_folder)
           output$downloadReport <- downloadHandler(
             filename = paste("Formal Report ", Sys.Date(), ".docx", sep = ""),
@@ -198,7 +198,14 @@ server <- function(input, output, session) {
       }))
       
     ## ANALYTICS TAB ##
-      observeEvent(input$trendSubmit,{
+      dataInput <- reactive({
+        getSymbols(input$trendType,
+          from = input$fromTrendDate,
+          to = input$toTrendDate,
+          auto.assign = FALSE)
+      })
+      # observeEvent(input$trendSubmit,{
+      output$plot <- renderPlot({ 
       db <- dbConnect(
         MySQL(), dbname = databaseName, host = options()$mysql$host,
         port = options()$mysql$port, user = options()$mysql$user,
@@ -212,20 +219,24 @@ server <- function(input, output, session) {
       trendData <- dbGetQuery(db, trendQuery)
       dbDisconnect(db)
       output$trendPlot <- renderPlot({
-        trend <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
-        names(trend) <- c("Date", "Freq")
-        df <- data.frame(
-          Date = as.Date(trend$Date, "%Y-%m-%d"),
-          Frequency = trend$Freq
-        )
-        ggplot(df, aes(x=Date, y=Frequency)) + 
-          geom_bar(stat = "identity") + theme_bw() + 
-          labs(x = "Date", y = "Frequency") + 
-          scale_x_date(labels = date_format("%m-%d-%Y")) +
-          theme(axis.text.x = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"),
-                axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),  
-                axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
-                axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
+        chartSeries(
+          dataInput(), theme = chartTheme("white"),
+          type = "line", log.scale = input$log, TA = NULL)
+        
+        # trend <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
+        # names(trend) <- c("Date", "Freq")
+        # df <- data.frame(
+        #   Date = as.Date(trend$Date, "%Y-%m-%d"),
+        #   Frequency = trend$Freq
+        # )
+        # ggplot(df, aes(x=Date, y=Frequency)) + 
+        #   geom_bar(stat = "identity") + theme_bw() + 
+        #   labs(x = "Date", y = "Frequency") + 
+        #   scale_x_date(labels = date_format("%m-%d-%Y")) +
+        #   theme(axis.text.x = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"),
+        #         axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),  
+        #         axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
+        #         axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
       })
     })
       
@@ -389,6 +400,39 @@ server <- function(input, output, session) {
         output$table <- renderTable(data)
       })
       
+      ## REGISTER A USER ##
+      observeEvent(input$userSubmit,{
+        table <- "user"
+        db <- dbConnect(
+          MySQL(), dbname = databaseName, host = options()$mysql$host,
+          port = options()$mysql$port, user = options()$mysql$user,
+          password = options()$mysql$password
+        )
+        query <- paste0(
+          "SELECT * FROM greenbook.user"
+        )
+        data <- as.data.frame(dbGetQuery(db, query))
+        dbDisconnect(db)
+        
+        if((input$userUserName != "" && is.na(input$userPermissionLevel) == FALSE && input$userPassword1 != "" && input$userPassword1 == input$userPassword2) == TRUE){
+          table <- "user"
+          db <- dbConnect(
+            MySQL(), dbname = databaseName, host = options()$mysql$host,
+            port = options()$mysql$port, user = options()$mysql$user,
+            password = options()$mysql$password
+          )
+          query <- sprintf(
+            "INSERT INTO `greenbook`.`user` (`username`, `password`, `user_firstName`, `user_lastName`, `permission`) 
+            VALUES('%s', '%s', '%s', '%s', '%s');", input$userUserName, input$userPassword1, input$userFirstName, input$userLastName, input$userPermissionLevel
+          )
+          dbGetQuery(db, query)
+          dbDisconnect(db)
+          reset("registerForm")
+          shinyalert("Success!", "You have submitted your daily report.", type = "success")
+        }else{
+          shinyalert("Hold on!", "You have not filled all required fields: username, and password confirmation", type = "warning")
+        }
+      })
       
     ## CLEAR FORM BUTTONS ##
       observeEvent(input$incidentReset, {
