@@ -81,7 +81,7 @@ ui <- dashboardPage(
             ),
             fluidRow(
               column(width = 1),
-              column(width = 6,
+              column(width = 9,
                 br(), br(), h2("Recent Cadet Data"),
                 box(
                   title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
@@ -131,8 +131,7 @@ ui <- dashboardPage(
                 )
               ),
               dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = Sys.Date() - 30, width = '400px'),
-              dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px'),
-              actionButton("trendSubmit", "Plot", icon("paper-plane"))
+              dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px')
             ),
             box(title = "Trends!", status = "primary", solidHeader = TRUE,
               plotOutput("trendPlot")

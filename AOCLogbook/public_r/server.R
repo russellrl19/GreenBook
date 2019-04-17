@@ -79,7 +79,7 @@ server <- function(input, output, session) {
       })
       
       observeEvent(
-        toListen(), delay(500, {
+        toListen(), delay(600, {
           db <- dbConnect(
             MySQL(), dbname = databaseName, host = options()$mysql$host, 
             port = options()$mysql$port, user = options()$mysql$user, 
@@ -198,7 +198,7 @@ server <- function(input, output, session) {
       }))
       
     ## ANALYTICS TAB ##
-      observeEvent(input$trendSubmit,{
+      observeEvent(input$trendType,{
       db <- dbConnect(
         MySQL(), dbname = databaseName, host = options()$mysql$host,
         port = options()$mysql$port, user = options()$mysql$user,
@@ -235,26 +235,28 @@ server <- function(input, output, session) {
       inserted <- list(c())
       observeEvent(input$insertBtn, {
         btn <- input$insertBtn
-        Id <- paste0('keydet', length(inserted))
-        
-        insertUI(
-          selector = "#insertCadetBox",
-          ui = tags$div(
-            box(
-              title = sprintf("Cadet %s", length(inserted)), status = "warning", solidHeader = TRUE, width = NULL,
-              textInput("firstName1", "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
-              textInput("midName1", "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
-              textInput("lastName1", "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
-              numericInput("roomNum1", "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
-            ), Id = Id)
-        )
-        inserted <<- c(Id, inserted)
+        Id <- paste0('keydet', (length(inserted) + 1))
+        if(length(inserted) < 5) {
+          insertUI(
+            selector = "#insertCadetBox",
+            ui = tags$div(
+              box(
+                title = sprintf("Cadet %s", length(inserted)), status = "warning", solidHeader = TRUE, width = NULL,
+                textInput(sprintf("firstName%s", length(inserted)), "First Name: (REQUIRED)", width = NULL, placeholder = "First Name"),
+                textInput(sprintf("midName%s", length(inserted)), "Middle Initial:", width = NULL, placeholder = "Middle Initial"),
+                textInput(sprintf("lastName%s", length(inserted)), "Last Name: (REQUIRED)", width = NULL, placeholder = "Last Name"),
+                numericInput(sprintf("roomNum%s", length(inserted)), "Room Number:", value = "", width = NULL, min = 100, max = 3440 )
+              ), Id = Id)
+          )
+          inserted <<- c(Id, inserted)
+        }
       })
       
       observeEvent(input$removeBtn, {
         removeUI(
           selector = paste0('#', inserted)
         )
+        print(testInserted)
         if(length(inserted) > 1){
           inserted <<- inserted[-1]
         }
@@ -268,24 +270,41 @@ server <- function(input, output, session) {
           inFile <- input$file
           file.copy(inFile$datapath, file.path("www/images", inFile$name))
           if(is.null(input$file)){fileUpload <- (paste(""))} else{
-            ## THIS WORKS FOR LOCAL ##
-              # fileUpload <- paste0("images/", input$file)
-            ## THIS WORKS FOR SHINYAPPS.IO ##
-              fileUpload <- paste0("https://vmigreenbook.shinyapps.io/public_r/images/", input$file)
-              file.copy(inFile$datapath, file.path("www/images", inFile$name))
-            }
+            fileUpload <- paste0("https://vmigreenbook.shinyapps.io/public_r/images/", input$file)
+            file.copy(inFile$datapath, file.path("www/images", inFile$name))
+          }
           
           db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
                           port = options()$mysql$port, user = options()$mysql$user,
                           password = options()$mysql$password)
           str <- (length(inserted) - 1)
           if(str != 0){
-            for(variablei in 1:str){
-              
-              fName <- input$firstName1   ## HARD CODED BUT WORKS FOR 1 CADET EXTRA
-              mName <- input$midName1
-              lName <- input$lastName1
-              roomNum <- input$roomNum1
+            for(i in 1:str){
+              fName = ""
+              mName = ""
+              lName = ""
+              roomNum = ""
+              if(i == 1){
+                fName <- input$firstName1
+                mName <- input$midName1
+                lName <- input$lastName1
+                roomNum <- input$roomNum1
+              }else if(i == 2){
+                fName <- input$firstName2
+                mName <- input$midName2
+                lName <- input$lastName2
+                roomNum <- input$roomNum2
+              }else if(i == 3){
+                fName <- input$firstName3
+                mName <- input$midName3
+                lName <- input$lastName3
+                roomNum <- input$roomNum3
+              }else if(i == 4){
+                fName <- input$firstName4
+                mName <- input$midName4
+                lName <- input$lastName4
+                roomNum <- input$roomNum4
+              }
               
               if(is.null(roomNum) || is.na(roomNum)){roomNum = (paste(""))}
               
