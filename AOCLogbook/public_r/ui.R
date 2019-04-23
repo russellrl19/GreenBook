@@ -63,16 +63,14 @@ ui <- dashboardPage(
             actionButton("submitLogin", "Submit") 
           )
         )
-      ),
-      
-      br(), br(),
+      ),br(),
       
       fluidRow(
         column(width = 1),
         column(width = 9,
           h2("Register"), useShinyjs(),
           div(id = "registerForm",
-            box(title = "Registration", status = "primary", width = 4,
+            box(title = "Registration", status = "primary", width = 4, collapsible = T,
               textInput("userFirstName", "First Name:", width = NULL, placeholder = "First Name"),
               textInput("userLastName", "Last Name:", width = NULL, placeholder = "Last Name"),
               textInput("userUserName", "Username:", width = NULL, placeholder = "Username"),
@@ -89,7 +87,7 @@ ui <- dashboardPage(
             )
           )
         )
-      )
+      ), br(), br()
     ),
     hidden(
       div(id = "userForm",
@@ -126,50 +124,63 @@ ui <- dashboardPage(
           ),
         ## DATA ANALYSIS ##
           tabItem(tabName = "dataAnalysis",
-            h2("Data Analysis"), br(), br(),
-            box(title = "Choose trend:", status = "warning", solidHeader = TRUE, width = 4,
-              selectInput("trendType", "Trend:",
-                c("Choose one" = "",
-                  "Absence Barracks/Post",
-                  "Weapons",
-                  "Assault",
-                  "Conduct",
-                  "Civilian Clothing",
-                  "Vandalizing",
-                  "Disturbance/Dispute",
-                  "Alcohol",
-                  "Unauthorized Ratline Activity",
-                  "Improper Dress (C)",
-                  "Loss/Misuse Institute Property (C)",
-                  "Evading OC/Guard (C)",
-                  "Neglect of Duty - Guard",
-                  "Neglect of Duty - General",
-                  "Visiting Unauthorized - Off Post",
-                  "Visiting Unauthorized - On Post",
-                  "Visiting Unauthorized - In Barracks",
-                  "Visitors Unauthorized",
-                  "Fire",
-                  "EMT/Rescue",
-                  "Police Emergency",
-                  "Police Arrest",
-                  "Police Barracks",
-                  "Police Post",
-                  "Emergency General",
-                  "Physical Plant",
-                  "Title IX",
-                  "Suicide Attempt",
-                  "Suicide Thoughts",
-                  "Sick/Injured",
-                  "Room/Stoop",
-                  "Other"
+            fluidRow(
+              column(width = 1),
+              column(width = 9,
+                h2("Data Analysis"), br(), br(),
+                box(title = "Choose trend:", status = "warning", solidHeader = TRUE, width = 4,
+                  selectInput("trendType", "Trend:",
+                    c("Choose one" = "",
+                      "Absence Barracks/Post",
+                      "Weapons",
+                      "Assault",
+                      "Conduct",
+                      "Civilian Clothing",
+                      "Vandalizing",
+                      "Disturbance/Dispute",
+                      "Alcohol",
+                      "Unauthorized Ratline Activity",
+                      "Improper Dress (C)",
+                      "Loss/Misuse Institute Property (C)",
+                      "Evading OC/Guard (C)",
+                      "Neglect of Duty - Guard",
+                      "Neglect of Duty - General",
+                      "Visiting Unauthorized - Off Post",
+                      "Visiting Unauthorized - On Post",
+                      "Visiting Unauthorized - In Barracks",
+                      "Visitors Unauthorized",
+                      "Fire",
+                      "EMT/Rescue",
+                      "Police Emergency",
+                      "Police Arrest",
+                      "Police Barracks",
+                      "Police Post",
+                      "Emergency General",
+                      "Physical Plant",
+                      "Title IX",
+                      "Suicide Attempt",
+                      "Suicide Thoughts",
+                      "Sick/Injured",
+                      "Room/Stoop",
+                      "Other"
+                    )
+                  ),
+                  dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = Sys.Date() - 30, width = '400px'),
+                  dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px')
+                ),
+                box(title = "Results", status = "primary", solidHeader = TRUE, width = 8,
+                  plotOutput("trendPlot")
                 )
-              ),
-              dateInput("fromTrendDate", "From:", format = "mm-dd-yyyy", value = Sys.Date() - 30, width = '400px'),
-              dateInput("toTrendDate", "To:", format = "mm-dd-yyyy", value = Sys.Date(), width = '400px')
+              )
             ),
-            box(title = "Trends!", status = "primary", solidHeader = TRUE,
-              plotOutput("trendPlot")
-            )
+            fluidRow(
+              column(width = 1),
+              column(width = 10,
+                box(title = "Detailed Results", status = "primary", width = NULL,
+                  dataTableOutput("trendDataTable")
+                )
+              )
+            ), br()
           ),
         ## INCIDENT REPORT ##
           tabItem(tabName = "incidentReport",

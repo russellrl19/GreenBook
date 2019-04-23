@@ -243,12 +243,13 @@ server <- function(input, output, session) {
         password = options()$mysql$password
       )
       trendQuery <- paste0(
-        "SELECT * FROM greenbook.incident_report
+        "SELECT cadet_fname, cadet_minitial, cadet_lname, incident_time, incident_date, officer_narrative FROM greenbook.incident_report
         WHERE (incident_date BETWEEN '", input$fromTrendDate, "' AND '", input$toTrendDate, "')
         AND (incident_type = '", input$trendType, "');"
       )
       trendData <- dbGetQuery(db, trendQuery)
       dbDisconnect(db)
+      
       output$trendPlot <- renderPlot({
         trend <- as.data.frame(table(as.Date(trendData$incident_date, "%Y-%m-%d")))
         names(trend) <- c("Date", "Freq")
@@ -257,14 +258,34 @@ server <- function(input, output, session) {
           Frequency = trend$Freq
         )
         ggplot(df, aes(x=Date, y=Frequency)) +
-          geom_bar(stat = "identity") + theme_bw() +
+          geom_bar(stat = "identity") + theme_bw() + stat_smooth(method = lm) +
           labs(x = "Date", y = "Frequency") +
           scale_x_date(labels = date_format("%m-%d-%Y")) +
           theme(axis.text.x = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"),
                 axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),
                 axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
                 axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
+        
+        # Date = as.Date(trend$Date, "%Y-%m-%d")
+        # Frequency = trend$Freq
+        # # 0. Build linear model
+        # data(df)
+        # model <- lm(Date ~ Frequency, data = df)
+        # # 1. Add predictions
+        # pred.int <- predict(model, interval = "prediction")
+        # mydata <- cbind(df, pred.int)
+        # # 2. Regression line + confidence intervals
+        # library("ggplot2")
+        # p <- ggplot(mydata, aes(x=Date, y=Frequency)) +
+        #   geom_point() +
+        #   stat_smooth(method = lm)
+        # # 3. Add prediction intervals
+        # p + geom_line(aes(y = lwr), color = "red", linetype = "dashed")+
+        #   geom_line(aes(y = upr), color = "red", linetype = "dashed")
       })
+      
+      output$trendDataTable <- renderDataTable({trendData}, escape = FALSE)
+        
     })
 
     ## INCIDENT REPORT, DIALY REPORT, SEARCH QUERYS ##
@@ -294,7 +315,6 @@ server <- function(input, output, session) {
         removeUI(
           selector = paste0('#', inserted)
         )
-        print(testInserted)
         if(length(inserted) > 1){
           inserted <<- inserted[-1]
         }
