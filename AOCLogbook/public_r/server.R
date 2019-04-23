@@ -39,6 +39,10 @@ server <- function(input, output, session) {
     dbDisconnect(db)
     
     if((input$userUserName != "" && is.na(input$userPermissionLevel) == FALSE && input$userPassword1 != "" && input$userPassword1 == input$userPassword2) == TRUE){
+      
+      hashedPassword <- hash(charToRaw(input$userPassword1), size = 32)
+      str <- bin2hex(hashedPassword)
+      
       table <- "user"
       db <- dbConnect(
         MySQL(), dbname = databaseName, host = options()$mysql$host,
@@ -47,7 +51,7 @@ server <- function(input, output, session) {
       )
       query <- sprintf(
         "INSERT INTO `greenbook`.`user` (`username`, `password`, `user_firstName`, `user_lastName`, `permission`)
-            VALUES('%s', '%s', '%s', '%s', '%s');", input$userUserName, input$userPassword1, input$userFirstName, input$userLastName, input$userPermissionLevel
+            VALUES('%s', '%s', '%s', '%s', '%s');", input$userUserName, str, input$userFirstName, input$userLastName, input$userPermissionLevel
       )
       dbGetQuery(db, query)
       dbDisconnect(db)
@@ -65,6 +69,10 @@ server <- function(input, output, session) {
 ## LOGIN SETUP ##
   loggedIn <- FALSE
   observeEvent(input$submitLogin,{
+    
+    hashedPassword <- hash(charToRaw(input$password), size = 32)
+    str <- bin2hex(hashedPassword)
+    
     databaseName <- "greenbook"
     table <- "user"
     db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,
@@ -74,7 +82,7 @@ server <- function(input, output, session) {
     query <- sprintf(
       paste0(
         "SELECT * FROM greenbook.user
-        WHERE username = '", input$username, "' AND password = '", input$password, "';"
+        WHERE username = '", input$username, "' AND password = '", str, "';"
       ),
       table,
       paste(names(data), collapse = ", ")
