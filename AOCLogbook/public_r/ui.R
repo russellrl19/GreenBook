@@ -100,6 +100,7 @@ ui <- dashboardPage(
               column(width = 1),
               column(width = 9,
                 h2("Formal Report"),
+                dateInput("reportDateInput", "Select date", format = "mm-dd-yyyy", width = NULL),
                 downloadButton('downloadReport'),
                 h2("Recent TAC Data"),
                 box(
@@ -108,7 +109,7 @@ ui <- dashboardPage(
                 ),
                 box(
                   title = "Your Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
-                  column(12, tableOutput('dahboardDaily'))
+                  column(12, dataTableOutput('dahboardDaily'))
                 )
               )
             ),
@@ -118,7 +119,7 @@ ui <- dashboardPage(
                 br(), br(), h2("Recent Cadet Data"),
                 box(
                   title = "Cadet Guard Team Submissions: Daily Reports", status = "primary", solidHeader = TRUE, width = NULL,
-                  column(12, tableOutput('dahboardCadet'))
+                  column(12, dataTableOutput('dahboardCadet'))
                 )
               )
             ), br(), br()

@@ -5,8 +5,8 @@ account: vmigreenbook
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 769708
-bundleId: 2011491
+bundleId: 2036065
 url: https://vmigreenbook.shinyapps.io/public_r/
-when: 1555308212.3081
+when: 1556121673.53294
 asMultiple: FALSE
 asStatic: FALSE

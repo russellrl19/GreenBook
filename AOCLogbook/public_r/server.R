@@ -149,7 +149,7 @@ server <- function(input, output, session) {
             )
             query2 <- sprintf(
               paste0(
-                "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+                "SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
                 OR userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"
               ),
               "daily_report"
@@ -157,7 +157,7 @@ server <- function(input, output, session) {
             if(data$permission > 1){
               query3 <- sprintf(
                 paste0(
-                  "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+                  "SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
                   OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"
                 ),
                 "daily_report"
@@ -165,7 +165,7 @@ server <- function(input, output, session) {
             }else{
               query3 <- sprintf(
                 paste0(
-                  "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
+                  "SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date() - 1, "' AND daily_time > ' 17:00:00 '
                   OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "'"
                 ),
                 "daily_report"
@@ -182,21 +182,21 @@ server <- function(input, output, session) {
             )
             query2 <- sprintf(
               paste0(
-                "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
+                "SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
               ),
               "daily_report"
             )
             if(data$permission > 1){
               query3 <- sprintf(
                 paste0(
-                  "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ",cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
+                  "SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ",cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
                 ),
                 "daily_report"
               )
             }else{
               query3 <- sprintf(
                 paste0(
-                  "SELECT daily_date, daily_time, daily_event_type, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ", cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
+                  "SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ", cadet, " '", loggedInUsername, "' AND daily_date = '", Sys.Date(), "' AND daily_time  > ' 17:00:00 '"
                 ),
                 "daily_report"
               )
@@ -207,7 +207,6 @@ server <- function(input, output, session) {
           names(incidentData) <- c("Cadet Last Name", "Incident Type", "Date", "Time", "Image")
           if(nrow(incidentData) == 0){} else if(is.null(incidentData$Image) == FALSE){
             incidentData$Image <- paste0("<a href='",incidentData$Image,"' target='_blank'>",substring(incidentData$Image,51),"</a>")
-
           }else{incidentData$Image <- ""}
           output$dahboardIncident <- renderDataTable({incidentData}, escape = FALSE)
 
@@ -215,36 +214,61 @@ server <- function(input, output, session) {
           names(incidentReportData) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
 
           dailyData <- as.data.frame(dbGetQuery(db, query2))
-          names(dailyData) <- c("Date", "Time", "Event Type", "Notes", "User")
-          output$dahboardDaily <- renderTable(dailyData)
+          names(dailyData) <- c("Event Type","Date", "Time", "Notes", "User")
+          output$dahboardDaily <- renderDataTable({dailyData}, escape = FALSE)
 
           cadetData <- as.data.frame(dbGetQuery(db, query3))
-          names(cadetData) <- c("Date", "Time", "Event Type", "Notes", "User")
-          output$dahboardCadet <- renderTable(cadetData)
+          names(cadetData) <- c("Event Type", "Date", "Time", "Notes", "User")
+          output$dahboardCadet <- renderDataTable({cadetData}, escape = FALSE)
           dbDisconnect(db)
+        }))
 
-          temp_folder <- tempfile()
-          # onStop(function() {
-          #   cat("Removing Temporary Files and Folders\n")
-          #   unlink(temp_folder, recursive=TRUE)
-          # })
-          dir.create(temp_folder)
-          output$downloadReport <- downloadHandler(
-            filename = paste("Formal Report ", Sys.Date(), ".docx", sep = ""),
-            content = function(file) {
-              tempReport <- file.path(temp_folder, "report.Rmd")
-              tempTemplate <- file.path(temp_folder, "report_template.docx")
-              file.copy("report.Rmd", tempReport, overwrite = TRUE)
-              file.copy("report_template.docx", tempTemplate, overwrite = TRUE)
-              rmarkdown::render(
-                tempReport, 'word_document', output_file = file, params = list(officerIncidentData = incidentReportData, officerDailyData = dailyData, cadetDailyData = cadetData)
-              )
+          observeEvent(input$reportDateInput, {
+            temp_folder <- tempfile()
+            dir.create(temp_folder)
+            
+            db <- dbConnect(MySQL(), dbname = databaseName, host = options()$mysql$host,port = options()$mysql$port, user = options()$mysql$user,password = options()$mysql$password)
+            
+            if(data$permission == 1){
+              cadet <- "="
+            } else{
+              cadet <- "!="
             }
-          )
-      }))
+            
+            if(substring(Sys.time(), 12) < '17:00:00'){
+              query4 <- sprintf(paste0("SELECT cadet_lname, incident_type, incident_date, incident_time, image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", input$reportDateInput - 1, "' AND incident_time > '17:00:00' OR incident_date = '", input$reportDateInput, "'"),"incident_report")
+              query5 <- sprintf(paste0("SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", input$reportDateInput - 1, "' AND daily_time > ' 17:00:00 ' OR userName = '", loggedInUsername, "' AND daily_date = '", input$reportDateInput, "'"),"daily_report")
+              query6 <- sprintf(paste0("SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName != '", loggedInUsername, "' AND daily_date = '", input$reportDateInput - 1, "' AND daily_time > ' 17:00:00 ' OR userName ",cadet," '", loggedInUsername, "' AND daily_date = '", input$reportDateInput, "'"),"daily_report")
+            } else{
+              query4 <- sprintf(paste0("SELECT cadet_lname, incident_type, incident_date, incident_time, image_path FROM greenbook.incident_report WHERE officer = '", loggedInUsername, "' AND incident_date = '", input$reportDateInput, "' AND incident_time  > ' 17:00:00 '"),"incident_report")
+              query5 <- sprintf(paste0("SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName = '", loggedInUsername, "' AND daily_date = '", input$reportDateInput, "' AND daily_time  > ' 17:00:00 '"),"daily_report")
+              query6 <- sprintf(paste0("SELECT daily_event_type, daily_date, daily_time, daily_event_narrative, userName FROM greenbook.daily_report WHERE userName ", cadet, " '", loggedInUsername, "' AND daily_date = '", input$reportDateInput, "' AND daily_time  > ' 17:00:00 '"),"daily_report")
+            }
+            formalReportData1 <- as.data.frame(dbGetQuery(db, query4))
+            names(formalReportData1) <- c("Cadet Last Name", "Incident Type", "Date", "Time")
+            formalReportData2 <- as.data.frame(dbGetQuery(db, query5))
+            names(formalReportData2) <- c("Event Type","Date", "Time", "Notes", "User")
+            formalReportData3 <- as.data.frame(dbGetQuery(db, query6))
+            names(formalReportData3) <- c("Event Type", "Date", "Time", "Notes", "User")
+            
+            dbDisconnect(db)
+            
+            output$downloadReport <- downloadHandler(
+              filename = paste("Formal Report ", input$reportDateInput, ".docx", sep = ""),
+              content = function(file) {
+                tempReport <- file.path(temp_folder, "report.Rmd")
+                tempTemplate <- file.path(temp_folder, "report_template.docx")
+                file.copy("report.Rmd", tempReport, overwrite = TRUE)
+                file.copy("report_template.docx", tempTemplate, overwrite = TRUE)
+                rmarkdown::render(
+                  tempReport, 'word_document', output_file = file, params = list(officerIncidentData = formalReportData1, officerDailyData = formalReportData2, cadetDailyData = formalReportData3)
+                )
+              }
+            )
+          })
 
     ## ANALYTICS TAB ##
-      observeEvent(input$trendType,{
+      observeEvent(c(input$trendType, input$fromTrendDate, input$toTrendDate),{
       db <- dbConnect(
         MySQL(), dbname = databaseName, host = options()$mysql$host,
         port = options()$mysql$port, user = options()$mysql$user,
@@ -273,23 +297,6 @@ server <- function(input, output, session) {
                 axis.text.y = element_text(size = 16, hjust = 1, vjust = 0, face = "plain"),
                 axis.title.x = element_text(size = 16, hjust = .5, vjust = 0, face = "plain"),
                 axis.title.y = element_text(size = 16, hjust = .5, vjust = .5, face = "plain"))
-        
-        # Date = as.Date(trend$Date, "%Y-%m-%d")
-        # Frequency = trend$Freq
-        # # 0. Build linear model
-        # data(df)
-        # model <- lm(Date ~ Frequency, data = df)
-        # # 1. Add predictions
-        # pred.int <- predict(model, interval = "prediction")
-        # mydata <- cbind(df, pred.int)
-        # # 2. Regression line + confidence intervals
-        # library("ggplot2")
-        # p <- ggplot(mydata, aes(x=Date, y=Frequency)) +
-        #   geom_point() +
-        #   stat_smooth(method = lm)
-        # # 3. Add prediction intervals
-        # p + geom_line(aes(y = lwr), color = "red", linetype = "dashed")+
-        #   geom_line(aes(y = upr), color = "red", linetype = "dashed")
       })
       
       output$trendDataTable <- renderDataTable({trendData}, escape = FALSE)
