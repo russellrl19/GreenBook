@@ -19,6 +19,7 @@ library(RColorBrewer)
 library(rmarkdown)
 library(png)
 library(jpeg)
+library(sodium)
 
 Sys.setenv(TZ="America/New_York")
 
