@@ -23,7 +23,7 @@ https://github.com/russellrl19/GreenBook.git
 Install the R packages in R Studio's Console
 
 ```
-install.packages("shiny","shinydashboard","shinyTime","RMySQL","dbConnect","DBI","gWidgets","shinyjs","shinyalert","shinyBS","plotly","ggplot2","scales","glue","grid","RColorBrewer","rmarkdown","png","jpeg","sodium")
+install.packages(c("shiny","shinydashboard","shinyTime","RMySQL","dbConnect","DBI","gWidgets","shinyjs","shinyalert","shinyBS","plotly","ggplot2","scales","glue","grid","RColorBrewer","rmarkdown","png","jpeg","sodium"))
 ```
 
 Open server.R and ensure that the AWS server access is NOT commented out and that the local server access is commented out
