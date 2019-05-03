@@ -26,7 +26,7 @@ Install the R packages in R Studio's Console
 install.packages(c("shiny","shinydashboard","shinyTime","RMySQL","dbConnect","DBI","gWidgets","shinyjs","shinyalert","shinyBS","plotly","ggplot2","scales","glue","grid","RColorBrewer","rmarkdown","png","jpeg","sodium"))
 ```
 
-Open server.R and ensure that the AWS server access is NOT commented out and that the local server access is commented out
+Open server.R and ensure that the AWS server access is NOT commented out and that the local server access is commented out.
 ```
   # FOR AWS #
   options(
@@ -48,6 +48,9 @@ Open server.R and ensure that the AWS server access is NOT commented out and tha
   #   )
   # )
 ```
+## Known Bugs
+* Uploading Images are being stored on ShinyApps.io Server. This is not ideal and they are reset every time the server sleeps or the application is republished.
+* Registration needs to be restricted so that any person cannot just get on and start posting things. Future work: Make registrations requests rather than direct registration.
 
 ## Built With
 
@@ -61,6 +64,6 @@ Open server.R and ensure that the AWS server access is NOT commented out and tha
 * **Madison Curran** - [GitHub](https://github.com/curryrann)
 * **Ryan Russell** - [GitHub](https://github.com/russellrl19)
 
-## Help Received:
+## Help Received
 
 * All Libraries listed
